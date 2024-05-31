@@ -29,7 +29,7 @@ OK_time_sleep = 0.9
 move_mouse_time_sleep = 0.02
 click_sleep_time = 0.02
 buy_lot_button_anim_time = 0.02
-find_first_page_button_time_sleep = 0.1
+page_swap_anim_time = 0.6
 
 distance_between_page_numbers = 24
 
@@ -75,13 +75,13 @@ def recognize_image(image, psm_config, whitelist):
             return cache
         return "None"
     
-def FindFirstPageButton():
+def FindAndClickFirstPageButton():
     try:
         pg1 = pyautogui.locateCenterOnScreen('page1.png')
         move_mouse(pg1[0] + distance_between_page_numbers, pg1[1])
     
         mouse_click()
-        time.sleep(find_first_page_button_time_sleep)
+        time.sleep(page_swap_anim_time)
         return True
 
     except:
@@ -235,9 +235,9 @@ while True:
         
     search()
 
-    if (not FindFirstPageButton()) : continue
+    if (not FindAndClickFirstPageButton()) : continue
 
-    AnalizePage(iteration)
+    AnalizePage()
     #screenshot().save("priceicons/priceicon_iteration" + str(iteration) + ".jpg")
     iteration += 1  
     #logfile.flush()
