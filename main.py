@@ -25,10 +25,10 @@ cache_price_icons_list = []
 cache_price_recognized = []
 
 search_sleep_time = 0.4
-OK_time_sleep = 0.9
+OK_time_sleep = 1.5
 move_mouse_time_sleep = 0.02
 click_sleep_time = 0.02
-buy_lot_button_anim_time = 0.02
+buy_lot_button_anim_time = 0
 page_swap_anim_time = 0.6
 
 distance_between_page_numbers = 24
