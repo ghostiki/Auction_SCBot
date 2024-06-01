@@ -25,7 +25,7 @@ cache_price_icons_list = []
 cache_price_recognized = []
 
 search_sleep_time = 0.4
-OK_time_sleep = 1.5
+OK_time_sleep = 0.9
 move_mouse_time_sleep = 0.02
 click_sleep_time = 0.02
 buy_lot_button_anim_time = 0
@@ -232,6 +232,8 @@ while True:
     #print("Iteration " + str(iteration))
     #print()
     #logfile.write("Iteration " + str(iteration) + '\n' + '\n')
+
+    if iteration % 30 == 0: ClickOK()
         
     search()
 
