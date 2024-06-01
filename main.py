@@ -6,10 +6,10 @@ import numpy as np
 from tesserocr import PyTessBaseAPI, PSM, RIL
 import os
 
-items = ['Продвинутые запчасти', 'Перун']
-items_prices = [46000, 28000]
+items = ['Продвинутые запчасти', 'Перун', 'Тактический запас']
+items_prices = [46000, 28000, 35000]
 
-buyoutprice = items_prices[1]
+buyoutprice = items_prices[2]
 
 lots_count = 10
 
@@ -32,6 +32,9 @@ buy_lot_button_anim_time = 0
 page_swap_anim_time = 0.6
 
 distance_between_page_numbers = 24
+
+First_page_image = Image.open("auction_1st_page.png")
+First_page_coords = (980, 765, 170, 18)
 
 def search():
     move_mouse(search_button_position_x, search_button_position_y)
@@ -77,7 +80,8 @@ def recognize_image(image, psm_config, whitelist):
     
 def FindAndClickFirstPageButton():
     try:
-        pg1 = pyautogui.locateCenterOnScreen('page1.png')
+        #pg1 = pyautogui.locateCenterOnScreen('page1.png')
+        pg1 = pyautogui.center(pyautogui.locateOnScreen(First_page_image, First_page_coords))
         move_mouse(pg1[0] + distance_between_page_numbers, pg1[1])
     
         mouse_click()
