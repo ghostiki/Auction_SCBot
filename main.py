@@ -7,9 +7,10 @@ from tesserocr import PyTessBaseAPI, PSM, RIL
 import os
 
 items = ['Продвинутые запчасти', 'Перун', 'Тактический запас']
-items_prices = [46000, 28000, 35000]
+items_prices = [45000, 28000, 28000]
 
-buyoutprice = items_prices[2]
+buyoutprice = items_prices[0]
+page = 2
 
 lots_count = 10
 
@@ -25,18 +26,22 @@ cache_price_icons_list = []
 cache_price_recognized = []
 
 search_sleep_time = 0.4
-OK_time_sleep = 0.9
+OK_time_sleep = 0.7
 move_mouse_time_sleep = 0.02
 click_sleep_time = 0.02
 buy_lot_button_anim_time = 0
-page_swap_anim_time = 0.6
+page_swap_anim_time = 0.4
 
 distance_between_page_numbers = 24
 
 First_page_image = Image.open("auction_1st_page.png")
 First_page_coords = (980, 765, 170, 18)
 
-def search():
+FirstPageButtonCoords = []
+
+page -= 1
+
+def Search():
     move_mouse(search_button_position_x, search_button_position_y)
     pyautogui.click()
     time.sleep(search_sleep_time)
@@ -80,16 +85,19 @@ def recognize_image(image, psm_config, whitelist):
     
 def FindAndClickFirstPageButton():
     try:
-        #pg1 = pyautogui.locateCenterOnScreen('page1.png')
-        pg1 = pyautogui.center(pyautogui.locateOnScreen(First_page_image, First_page_coords))
-        move_mouse(pg1[0] + distance_between_page_numbers, pg1[1])
-    
-        mouse_click()
-        time.sleep(page_swap_anim_time)
+        global FirstPageButtonCoords
+        #FirstPageButtonCoords = pyautogui.locateCenterOnScreen('page1.png')
+        FirstPageButtonCoords = pyautogui.center(pyautogui.locateOnScreen(First_page_image, First_page_coords))
+        ClickPageButton(FirstPageButtonCoords[0] + distance_between_page_numbers * page, FirstPageButtonCoords[1])
         return True
 
     except:
         return False
+    
+def ClickPageButton(x, y):
+    move_mouse(x, y)
+    mouse_click()
+    time.sleep(page_swap_anim_time)
 
 def AnalizePage():
     screen = screenshot()
@@ -105,7 +113,7 @@ def AnalizePage():
     #print('!!! PAGE IS EMPTY !!!')
     #print()
     #logfile.write('\n' + "!!! PAGE IS EMPTY !!!" + '\n' + '\n')
-    founded_pricec_log.write('\n' + "!!! PAGE IS EMPTY !!!" + '\n' + '\n')
+    #founded_pricec_log.write('\n' + "!!! PAGE IS EMPTY !!!" + '\n' + '\n')
     return False
 
 def FindLowerPrice(prices_images):
@@ -142,7 +150,7 @@ def FindLowerPrice(prices_images):
         #print("!!! LOWER PRICE FOUNDED !!! " + str(recognized_price) + " rub")
         #print()
         #logfile.write('\n' + "!!! LOWER PRICE FOUNDED !!! " + str(recognized_price) + " rub" + '\n' + '\n')
-        founded_pricec_log.write(str(recognized_price) + ' iteration_' + str(iteration) + "_priceicon_" + str(i) + '\n')
+        #founded_pricec_log.write(str(recognized_price) + ' iteration_' + str(iteration) + "_priceicon_" + str(i) + '\n')
 
         #priceicon.save("priceicons/priceicon_iteration_" + str(iteration) + "_priceicon_" + str(i) + ".jpg")
 
@@ -158,21 +166,22 @@ def BuyLot(lot_number, recognized_price):
     mouse_click()
     #PurchaseCheck(recognized_price)
     ClickOK()
+    Search()
 
     
 def PurchaseCheck(recognized_price):
     try:
         _coords = pyautogui.locateCenterOnScreen('Lot_Purchased.png')
-        founded_pricec_log.write(str(recognized_price) + '\n')
-        founded_pricec_log.write('Purchased' + '\n' + '\n')
+        #founded_pricec_log.write(str(recognized_price) + '\n')
+        #founded_pricec_log.write('Purchased' + '\n' + '\n')
         #logfile.write('Purchased' + '\n' + '\n')
     except:
         #logfile.write('Purchase FAILED' + '\n' + '\n')
         pass
 
 def ClickOK():
-    time.sleep(OK_time_sleep)
     move_mouse(ok_button_pos_x, ok_button_pos_y)
+    time.sleep(OK_time_sleep)
     mouse_click()
 
 def clearprice(priceRaw):
@@ -225,11 +234,13 @@ def drag_mouse(dx, dy):
 
 
 time_start = time.time()
-time.sleep(5)
-iteration = 0
+time.sleep(3)
+iteration = 1
+
+Search()
 
 #logfile = open("log.txt", "w")
-founded_pricec_log = open("founded_pricec_log.txt", "w")
+#founded_pricec_log = open("founded_pricec_log.txt", "w")
 #price_cache_file = open("price_cache_file.txt", "w")
 
 while True:
@@ -238,17 +249,18 @@ while True:
     #logfile.write("Iteration " + str(iteration) + '\n' + '\n')
 
     if iteration % 30 == 0: ClickOK()
-        
-    search()
+    iteration += 1  
 
     if (not FindAndClickFirstPageButton()) : continue
 
     AnalizePage()
+
+    ClickPageButton(FirstPageButtonCoords[0], FirstPageButtonCoords[1])
+
     #screenshot().save("priceicons/priceicon_iteration" + str(iteration) + ".jpg")
-    iteration += 1  
     #logfile.flush()
     #os.fsync(logfile.fileno())
-    founded_pricec_log.flush()
-    os.fsync(founded_pricec_log.fileno())
+    #founded_pricec_log.flush()
+    #os.fsync(founded_pricec_log.fileno())
     #price_cache_file.flush()
     #os.fsync(price_cache_file.fileno())
