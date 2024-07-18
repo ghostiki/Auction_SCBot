@@ -7,7 +7,7 @@ from tesserocr import PyTessBaseAPI, PSM, RIL
 import os
 
 items = ['Продвинутые запчасти', 'Перун', 'Тактический запас']
-items_prices = [46000, 28000, 29000]
+items_prices = [46000, 28000, 25000]
 
 buyoutprice = items_prices[2]
 page = 2
@@ -259,9 +259,7 @@ while True:
     #print()
     #logfile.write("Iteration " + str(iteration) + '\n' + '\n')
 
-    if iteration % 50 == 0:
-        ClickOK()
-        Search()
+    if iteration % 50 == 0: ClickOK()
     iteration += 1  
 
     if (not FindAndClickFirstPageButton()) : continue
