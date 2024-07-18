@@ -259,7 +259,9 @@ while True:
     #print()
     #logfile.write("Iteration " + str(iteration) + '\n' + '\n')
 
-    if iteration % 50 == 0: ClickOK()
+    if iteration % 50 == 0:
+        ClickOK()
+        Search()
     iteration += 1  
 
     if (not FindAndClickFirstPageButton()) : continue
