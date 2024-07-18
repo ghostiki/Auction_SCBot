@@ -7,9 +7,9 @@ from tesserocr import PyTessBaseAPI, PSM, RIL
 import os
 
 items = ['Продвинутые запчасти', 'Перун', 'Тактический запас']
-items_prices = [45000, 28000, 28000]
+items_prices = [46000, 28000, 28000]
 
-buyoutprice = items_prices[0]
+buyoutprice = items_prices[2]
 page = 2
 
 lots_count = 10
@@ -34,7 +34,7 @@ page_swap_anim_time = 0.4
 
 distance_between_page_numbers = 24
 
-First_page_image = Image.open("auction_1st_page.png")
+First_page_image = Image.open("page1.png")
 First_page_coords = (980, 765, 170, 18)
 
 FirstPageButtonCoords = []
@@ -248,14 +248,14 @@ while True:
     #print()
     #logfile.write("Iteration " + str(iteration) + '\n' + '\n')
 
-    if iteration % 30 == 0: ClickOK()
+    if iteration % 50 == 0: ClickOK()
     iteration += 1  
 
     if (not FindAndClickFirstPageButton()) : continue
 
     AnalizePage()
 
-    ClickPageButton(FirstPageButtonCoords[0], FirstPageButtonCoords[1])
+    #ClickPageButton(FirstPageButtonCoords[0], FirstPageButtonCoords[1])
 
     #screenshot().save("priceicons/priceicon_iteration" + str(iteration) + ".jpg")
     #logfile.flush()
