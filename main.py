@@ -7,7 +7,7 @@ from tesserocr import PyTessBaseAPI, PSM, RIL
 import os
 
 items = ['Продвинутые запчасти', 'Перун', 'Тактический запас']
-items_prices = [46000, 28000, 28000]
+items_prices = [46000, 28000, 29000]
 
 buyoutprice = items_prices[2]
 page = 2
@@ -35,16 +35,20 @@ page_swap_anim_time = 0.4
 distance_between_page_numbers = 24
 
 First_page_image = Image.open("page1.png")
+First_page_image_untouch = Image.open("page1_untouch.png")
 First_page_coords = (980, 765, 170, 18)
+First_page_image_touched = True
 
 FirstPageButtonCoords = []
 
 page -= 1
 
 def Search():
+    global First_page_image_touched
     move_mouse(search_button_position_x, search_button_position_y)
     pyautogui.click()
     time.sleep(search_sleep_time)
+    First_page_image_touched = True
 
 def screenshot():
     return pyautogui.screenshot(region=(x_screenshot, y_screenshot, screenshot_size_x, screenshot_size_y))
@@ -85,9 +89,15 @@ def recognize_image(image, psm_config, whitelist):
     
 def FindAndClickFirstPageButton():
     try:
+        global First_page_image_touched
         global FirstPageButtonCoords
         #FirstPageButtonCoords = pyautogui.locateCenterOnScreen('page1.png')
-        FirstPageButtonCoords = pyautogui.center(pyautogui.locateOnScreen(First_page_image, First_page_coords))
+        
+        if (First_page_image_touched):
+            FirstPageButtonCoords = pyautogui.center(pyautogui.locateOnScreen(First_page_image, First_page_coords))
+            First_page_image_touched = False
+        else: FirstPageButtonCoords = pyautogui.center(pyautogui.locateOnScreen(First_page_image_untouch, First_page_coords))
+
         ClickPageButton(FirstPageButtonCoords[0] + distance_between_page_numbers * page, FirstPageButtonCoords[1])
         return True
 
@@ -183,6 +193,7 @@ def ClickOK():
     move_mouse(ok_button_pos_x, ok_button_pos_y)
     time.sleep(OK_time_sleep)
     mouse_click()
+    
 
 def clearprice(priceRaw):
         price = ""
