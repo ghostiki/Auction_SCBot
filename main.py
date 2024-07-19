@@ -6,10 +6,10 @@ import numpy as np
 from tesserocr import PyTessBaseAPI, PSM, RIL
 import os
 
-items = ['Продвинутые запчасти', 'Перун', 'Тактический запас']
-items_prices = [47000, 28000, 25000]
+items = ['Продвинутые запчасти', 'Тактический запас']
+items_prices = [45000, 28000]
 
-buyoutprice = items_prices[0]
+buyoutprice = items_prices[1]
 page = 2
 
 lots_count = 10
@@ -29,17 +29,18 @@ search_sleep_time = 0.4
 OK_time_sleep = 0.7
 move_mouse_time_sleep = 0.02
 click_sleep_time = 0.02
-buy_lot_button_anim_time = 0
-page_swap_anim_time = 0.4
-refresh_page_after_click_OK_time = 0.2
+buy_lot_button_anim_time = 0.05
+page_pre_load_anim_time = 0
+page_post_load_anim_time = 0.3
+refresh_page_after_click_OK_time = 0
 
 distance_between_page_numbers = 24
 
-First_page_image = Image.open("page1.png")
-First_page_image_untouch = Image.open("page1_untouch.png")
+Page_image = Image.open('page' + str(page) + '.png')
+Page_image_touched = Image.open('page' + str(page) + '_touched.png')
 First_page_coords = (980, 765, 170, 18)
 
-FirstPageButtonCoords = []
+PageButtonCoords = []
 
 page -= 1
 
@@ -87,24 +88,24 @@ def recognize_image(image, psm_config, whitelist):
     
 def FindAndClickFirstPageButton():
     try:
-        global FirstPageButtonCoords
-        #FirstPageButtonCoords = pyautogui.locateCenterOnScreen('page1.png')
+        global PageButtonCoords
+        #PageButtonCoords = pyautogui.locateCenterOnScreen('page1.png')
+
+        time.sleep(page_pre_load_anim_time)
 
         try:
-            FirstPageButtonCoords = pyautogui.center(pyautogui.locateOnScreen(First_page_image, First_page_coords))
+            PageButtonCoords = pyautogui.center(pyautogui.locateOnScreen(Page_image, First_page_coords))
         except:
-            FirstPageButtonCoords = pyautogui.center(pyautogui.locateOnScreen(First_page_image_untouch, First_page_coords))
+            PageButtonCoords = pyautogui.center(pyautogui.locateOnScreen(Page_image_touched, First_page_coords))
 
-        ClickPageButton(FirstPageButtonCoords[0] + distance_between_page_numbers * page, FirstPageButtonCoords[1])
+        move_mouse(PageButtonCoords[0], PageButtonCoords[1])
+        mouse_click()
+
+        time.sleep(page_post_load_anim_time)
+
         return True
-
     except:
         return False
-    
-def ClickPageButton(x, y):
-    move_mouse(x, y)
-    mouse_click()
-    time.sleep(page_swap_anim_time)
 
 def AnalizePage():
     screen = screenshot()
@@ -242,8 +243,8 @@ def drag_mouse(dx, dy):
 
 
 time_start = time.time()
-time.sleep(3)
-iteration = 1
+time.sleep(2)
+iteration = 0
 
 Search()
 
@@ -252,18 +253,20 @@ Search()
 #price_cache_file = open("price_cache_file.txt", "w")
 
 while True:
+    iteration += 1  
     #print("Iteration " + str(iteration))
     #print()
     #logfile.write("Iteration " + str(iteration) + '\n' + '\n')
 
-    if iteration % 50 == 0: ClickOK()
-    iteration += 1  
-
+    if iteration % 50 == 0:
+        ClickOK()
+        Search()
+    
     if (not FindAndClickFirstPageButton()) : continue
 
     AnalizePage()
 
-    #ClickPageButton(FirstPageButtonCoords[0], FirstPageButtonCoords[1])
+    #ClickPageButton(PageButtonCoords[0], PageButtonCoords[1])
 
     #screenshot().save("priceicons/priceicon_iteration" + str(iteration) + ".jpg")
     #logfile.flush()
