@@ -5,12 +5,14 @@ import cv2
 import numpy as np
 from tesserocr import PyTessBaseAPI, PSM, RIL
 import os
+import glob
 
 items = ['Продвинутые запчасти', 'Тактический запас']
 items_prices = [45000, 28000]
 
 buyoutprice = items_prices[1]
 page = 2
+IsSaveImageInCache = True
 
 lots_count = 10
 
@@ -22,8 +24,6 @@ search_button_position_x, search_button_position_y = 1337, 337
 scroller_pos_x, scroller_pos_y = 1395, 335
 buy_button_pos_x, buy_button_offset_y = 1328, 55
 ok_button_pos_x, ok_button_pos_y = 961, 570
-cache_price_icons_list = []
-cache_price_recognized = []
 
 search_sleep_time = 0.4
 OK_time_sleep = 0.7
@@ -39,6 +39,13 @@ distance_between_page_numbers = 24
 Page_image = Image.open('page' + str(page) + '.png')
 Page_image_touched = Image.open('page' + str(page) + '_touched.png')
 First_page_coords = (980, 765, 170, 18)
+
+cache_prices = []
+cache_prices_images = []
+for cache_price in glob.glob('/cache_prices/*.png'):
+    cache_prices_image = Image.open(cache_price)
+    cache_prices.append(cache_price)
+    cache_prices_images.append(cache_prices_image)
 
 PageButtonCoords = []
 
@@ -130,10 +137,10 @@ def FindLowerPrice(prices_images):
         #logfile.write("Price number  " + str(i) + '\n')
 
         try:
-            index = cache_price_icons_list.index(prices_images[i])
-            recognized_price = cache_price_recognized[index]
+            index = cache_prices_images.index(prices_images[i])
+            recognized_price = cache_prices[index]
         except:
-            cache_price_icons_list.append(prices_images[i])
+            cache_prices_images.append(prices_images[i])
 
             priceicon = preprocess_image(np.array(prices_images[i]), (512, 150))
             recognized_price = recognize_image(priceicon, 7, '').strip()
@@ -143,8 +150,10 @@ def FindLowerPrice(prices_images):
 
             recognized_price = clearprice(recognized_price)
 
-            cache_price_recognized.append(recognized_price)
+            cache_prices.append(recognized_price)
             #price_cache_file.write(str(recognized_price) + '\n')
+
+            SaveImageInCache(prices_images[i], recognized_price)
 
         #print("int on image = " + str(recognized_price))
         #logfile.write("int on image = " + str(recognized_price) + '\n' + '\n')
@@ -165,6 +174,10 @@ def FindLowerPrice(prices_images):
         BuyLot(i, recognized_price)
         return(True)
     return False
+
+def SaveImageInCache(image, price):
+    if (IsSaveImageInCache):
+        image.save('cache_prices/' + str(price) + '.png')
 
 def BuyLot(lot_number, recognized_price):
     move_mouse(x_screenshot + good_line_loxal_coord_x, (y_screenshot + good_line_local_coord_y + lot_number * good_line_size_y))
