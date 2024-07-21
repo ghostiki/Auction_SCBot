@@ -8,13 +8,15 @@ import os
 import glob
 
 items = ['Продвинутые запчасти', 'Тактический запас']
-items_prices = [45000, 28000]
+items_prices = [50000, 28000]
 
-buyoutprice = items_prices[1]
+buyoutprice = items_prices[0]
 page = 2
 IsSaveImageInCache = True
+IsNeedScroll = True
 
 lots_count = 10
+scroll_offset = [90, 180, 269, 360]
 
 x_screenshot, y_screenshot, screenshot_size_x, screenshot_size_y = 889, 385, 513, 369
 x_price_offset, y_price_offset, price_size_x, price_size_y = 355, 2, 135, 30
@@ -27,12 +29,14 @@ ok_button_pos_x, ok_button_pos_y = 961, 570
 
 search_sleep_time = 0.4
 OK_time_sleep = 0.7
-move_mouse_time_sleep = 0.02
+move_mouse_sleep_time = 0.02
 click_sleep_time = 0.02
 buy_lot_button_anim_time = 0.05
 page_pre_load_anim_time = 0
 page_post_load_anim_time = 0.3
 refresh_page_after_click_OK_time = 0
+mouse_down_sleep_time = 0.02
+mouse_drag_down_sleep_time = 0.05
 
 distance_between_page_numbers = 24
 
@@ -101,9 +105,9 @@ def FindAndClickFirstPageButton():
         time.sleep(page_pre_load_anim_time)
 
         try:
-            PageButtonCoords = pyautogui.center(pyautogui.locateOnScreen(Page_image, First_page_coords))
-        except:
             PageButtonCoords = pyautogui.center(pyautogui.locateOnScreen(Page_image_touched, First_page_coords))
+        except:
+            PageButtonCoords = pyautogui.center(pyautogui.locateOnScreen(Page_image, First_page_coords))
 
         move_mouse(PageButtonCoords[0], PageButtonCoords[1])
         mouse_click()
@@ -124,6 +128,23 @@ def AnalizePage():
         #print()
         #logfile.write('\n' + 'PRICE FOUNDED' + '\n' + '\n')    
         return(True)
+    
+    if (IsNeedScroll):
+        for i in range(len(scroll_offset)):
+            print(i)
+            if (i == 0):
+                move_mouse(scroller_pos_x, scroller_pos_y)
+            drag_mouse(None, scroller_pos_y + scroll_offset[i])
+            print(scroller_pos_y + scroll_offset[i])
+            screen = screenshot()
+            cuttedprices = cut(screen, x_price_offset, y_price_offset, price_size_x, price_size_y )
+            if FindLowerPrice(cuttedprices):
+                #print()
+                #print('PRICE FOUNDED')
+                #print()
+                #logfile.write('\n' + 'PRICE FOUNDED' + '\n' + '\n')    
+                return(True)
+
     #print()
     #print('!!! PAGE IS EMPTY !!!')
     #print()
@@ -222,7 +243,7 @@ def clearprice(priceRaw):
 
 def move_mouse(x, y):
     pyautogui.moveTo(x, y)
-    time.sleep(move_mouse_time_sleep)
+    time.sleep(move_mouse_sleep_time)
 
 def mouse_click():
     pyautogui.click()
@@ -235,24 +256,22 @@ def mouse_up():
     pyautogui.mouseUp()
 
 def drag_mouse(dx, dy):
-    sleeptime = 0.05
-    dragtime = 0.2
 
     pyautogui.mouseDown()
-    time.sleep(sleeptime)
-    pyautogui.mouseDown()
-    time.sleep(sleeptime)
-    pyautogui.mouseDown()
-    time.sleep(sleeptime)
+    time.sleep(mouse_down_sleep_time)
+    #pyautogui.mouseDown()
+    #time.sleep(mouse_down_sleep_time)
+    #pyautogui.mouseDown()
+    #time.sleep(mouse_down_sleep_time)
     
-    pyautogui.moveTo(dx, dy, dragtime)
+    pyautogui.moveTo(dx, dy, mouse_drag_down_sleep_time)
 
     pyautogui.mouseUp()
-    time.sleep(sleeptime)
-    pyautogui.mouseUp()
-    time.sleep(sleeptime)
-    pyautogui.mouseUp()
-    time.sleep(sleeptime)
+    time.sleep(mouse_down_sleep_time)
+    #pyautogui.mouseUp()
+    #time.sleep(mouse_down_sleep_time)
+    #pyautogui.mouseUp()
+    #time.sleep(mouse_down_sleep_time)
 
 
 time_start = time.time()
