@@ -6,18 +6,19 @@ import numpy as np
 from tesserocr import PyTessBaseAPI, PSM, RIL
 import os
 import glob
+import os
 
+# BOT CONTROL START
 items = ['Продвинутые запчасти', 'Тактический запас']
 items_prices = [50000, 28000]
-
 buyoutprice = items_prices[0]
-page = 2
 IsSaveImageInCache = True
-IsNeedScroll = True
-IsLastScroll = False
+# BOT CONTROL END
 
 lots_count = 10
 scroll_offset = [90, 180, 269, 360]
+
+dir = os.path.dirname(os.path.abspath(__file__))
 
 #OLD Version
 #x_screenshot, y_screenshot, screenshot_size_x, screenshot_size_y = 889, 385, 513, 369
@@ -40,26 +41,30 @@ click_sleep_time = 0.02
 buy_lot_button_anim_time = 0.05
 page_pre_load_anim_time = 0
 page_post_load_anim_time = 0.3
-refresh_page_after_click_OK_time = 0
+refresh_page_after_click_OK_time = 0.1
 mouse_down_sleep_time = 0.02
 mouse_drag_down_sleep_time = 0.05
 
-distance_between_page_numbers = 24
+Page_images = []
+Page_images_touched = []
 
-Page_image = Image.open('page' + str(page) + '.png')
-Page_image_touched = Image.open('page' + str(page) + '_touched.png')
-First_page_coords = (980, 765, 170, 18)
+for page_icon in glob.glob(dir + '/Pages/*.png'):
+    Page_images.append(Image.open(page_icon))
+for page_touched_icon in glob.glob(dir + '/Pages_touched/*.png'):
+    Page_images_touched.append(Image.open(page_touched_icon))
+
+First_page_coords = (980, 755, 170, 25)
 
 cache_prices = []
 cache_prices_images = []
-for cache_price in glob.glob('/cache_prices/*.png'):
+for cache_price in glob.glob(dir + '/cache_prices/*.png'):
     cache_prices_image = Image.open(cache_price)
     cache_prices.append(cache_price)
     cache_prices_images.append(cache_prices_image)
 
 PageButtonCoords = []
-
-page -= 1
+page = 0
+current_scroll = 0
 
 def Search():
     move_mouse(search_button_position_x, search_button_position_y)
@@ -103,7 +108,7 @@ def recognize_image(image, psm_config, whitelist):
             return cache
         return "None"
     
-def FindAndClickFirstPageButton():
+def FindAndClickPageButton():
     try:
         global PageButtonCoords
         #PageButtonCoords = pyautogui.locateCenterOnScreen('page1.png')
@@ -111,9 +116,9 @@ def FindAndClickFirstPageButton():
         time.sleep(page_pre_load_anim_time)
 
         try:
-            PageButtonCoords = pyautogui.center(pyautogui.locateOnScreen(Page_image_touched, First_page_coords))
+            PageButtonCoords = pyautogui.center(pyautogui.locateOnScreen(Page_images_touched[page], First_page_coords))
         except:
-            PageButtonCoords = pyautogui.center(pyautogui.locateOnScreen(Page_image, First_page_coords))
+            PageButtonCoords = pyautogui.center(pyautogui.locateOnScreen(Page_images[page], First_page_coords))
 
         move_mouse(PageButtonCoords[0], PageButtonCoords[1])
         mouse_click()
@@ -125,38 +130,18 @@ def FindAndClickFirstPageButton():
         return False
 
 def AnalizePage():
-    global buy_button_offset_y
+    if (current_scroll != 0):
+        move_mouse(scroller_pos_x, scroller_pos_y)
+        drag_mouse(None, scroller_pos_y + scroll_offset[current_scroll - 1])
 
-    buy_button_offset_y = offsets_in_scroll_for_buy_button[0]
-
-    if (IsLastScroll):
-        buy_button_offset_y = offsets_in_scroll_for_buy_button[-1]
-        return AnalizeLastScroll()
-    
     screen = screenshot()
     cuttedprices = CutPrices(screen)
-    #screen.save("screens/screen_" + str(iteration) + ".jpg")
     if FindLowerPrice(cuttedprices):
         #print()
         #print('PRICE FOUNDED')
         #print()
         #logfile.write('\n' + 'PRICE FOUNDED' + '\n' + '\n')    
         return(True)
-    
-    if (IsNeedScroll):
-        for i in range(len(scroll_offset)):
-            buy_button_offset_y = offsets_in_scroll_for_buy_button[i + 1]
-            if (i == 0):
-                move_mouse(scroller_pos_x, scroller_pos_y)
-            drag_mouse(None, scroller_pos_y + scroll_offset[i])
-            screen = screenshot()
-            cuttedprices = CutPrices(screen)
-            if FindLowerPrice(cuttedprices):
-                #print()
-                #print('PRICE FOUNDED')
-                #print()
-                #logfile.write('\n' + 'PRICE FOUNDED' + '\n' + '\n')    
-                return(True)
 
     #print()
     #print('!!! PAGE IS EMPTY !!!')
@@ -247,6 +232,35 @@ def AnalizeLastScroll():
         return(True)
     return False
 
+def FindPageAndScroll():
+    global buy_button_offset_y
+    global page
+    global current_scroll
+
+    for i in range(len(Page_images)):
+        page = i
+        current_scroll = 0
+        buy_button_offset_y = offsets_in_scroll_for_buy_button[0]
+        FindAndClickPageButton()
+        screen = screenshot()
+        cuttedprices = CutPrices(screen)
+        if FindLowerPrice(cuttedprices): 
+            break
+        move_mouse(scroller_pos_x, scroller_pos_y)
+        for i in range(len(scroll_offset)):
+            current_scroll += 1
+            buy_button_offset_y = offsets_in_scroll_for_buy_button[i + 1]
+            drag_mouse(None, scroller_pos_y + scroll_offset[i])
+            screen = screenshot()
+            cuttedprices = CutPrices(screen)
+            if FindLowerPrice(cuttedprices): 
+                break
+        else:
+            continue
+        break
+
+    buy_button_offset_y = offsets_in_scroll_for_buy_button[current_scroll]
+
 def CutPrices(screenshot):
     return cut(screenshot, x_price_offset, y_price_offset, price_size_x, price_size_y)
 
@@ -318,11 +332,16 @@ while True:
     #print()
     #logfile.write("Iteration " + str(iteration) + '\n' + '\n')
 
+    if iteration - 1 % 100 == 0:
+        FindPageAndScroll()
+        continue
+
     if iteration % 50 == 0:
         ClickOK()
         Search()
+        continue
     
-    if (not FindAndClickFirstPageButton()) : continue
+    if (not FindAndClickPageButton()) : continue
 
     AnalizePage()
 
