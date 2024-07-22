@@ -14,17 +14,23 @@ buyoutprice = items_prices[0]
 page = 2
 IsSaveImageInCache = True
 IsNeedScroll = True
+IsLastScroll = False
 
 lots_count = 10
 scroll_offset = [90, 180, 269, 360]
 
-x_screenshot, y_screenshot, screenshot_size_x, screenshot_size_y = 889, 385, 513, 369
-x_price_offset, y_price_offset, price_size_x, price_size_y = 355, 2, 135, 30
-good_line_size_y = 36
-good_line_loxal_coord_x, good_line_local_coord_y = screenshot_size_x / 2, good_line_size_y / 2
+#OLD Version
+#x_screenshot, y_screenshot, screenshot_size_x, screenshot_size_y = 889, 385, 513, 369
+#x_price_offset, y_price_offset, price_size_x, price_size_y = 355, 2, 135, 30
+#good_line_size_y = 36
+x_screenshot, y_screenshot, screenshot_size_x, screenshot_size_y = 1240, 385, 135, 370
+x_price_offset, y_price_offset, price_size_x, price_size_y = 0, 2, 135, 30
+good_line_size_y = 37
+good_line_local_coord_x, good_line_local_coord_y = screenshot_size_x / 2, good_line_size_y / 2
 search_button_position_x, search_button_position_y = 1337, 337
 scroller_pos_x, scroller_pos_y = 1395, 335
-buy_button_pos_x, buy_button_offset_y = 1328, 55
+offsets_in_scroll_for_buy_button = [55, 45.25, 35.5, 25.75, 16]
+buy_button_pos_x, buy_button_offset_y = 1328, offsets_in_scroll_for_buy_button[0]
 ok_button_pos_x, ok_button_pos_y = 961, 570
 
 search_sleep_time = 0.4
@@ -119,8 +125,16 @@ def FindAndClickFirstPageButton():
         return False
 
 def AnalizePage():
+    global buy_button_offset_y
+
+    buy_button_offset_y = offsets_in_scroll_for_buy_button[0]
+
+    if (IsLastScroll):
+        buy_button_offset_y = offsets_in_scroll_for_buy_button[-1]
+        return AnalizeLastScroll()
+    
     screen = screenshot()
-    cuttedprices = cut(screen, x_price_offset, y_price_offset, price_size_x, price_size_y )
+    cuttedprices = CutPrices(screen)
     #screen.save("screens/screen_" + str(iteration) + ".jpg")
     if FindLowerPrice(cuttedprices):
         #print()
@@ -131,13 +145,12 @@ def AnalizePage():
     
     if (IsNeedScroll):
         for i in range(len(scroll_offset)):
-            print(i)
+            buy_button_offset_y = offsets_in_scroll_for_buy_button[i + 1]
             if (i == 0):
                 move_mouse(scroller_pos_x, scroller_pos_y)
             drag_mouse(None, scroller_pos_y + scroll_offset[i])
-            print(scroller_pos_y + scroll_offset[i])
             screen = screenshot()
-            cuttedprices = cut(screen, x_price_offset, y_price_offset, price_size_x, price_size_y )
+            cuttedprices = CutPrices(screen)
             if FindLowerPrice(cuttedprices):
                 #print()
                 #print('PRICE FOUNDED')
@@ -201,7 +214,7 @@ def SaveImageInCache(image, price):
         image.save('cache_prices/' + str(price) + '.png')
 
 def BuyLot(lot_number, recognized_price):
-    move_mouse(x_screenshot + good_line_loxal_coord_x, (y_screenshot + good_line_local_coord_y + lot_number * good_line_size_y))
+    move_mouse(x_screenshot + good_line_local_coord_x, (y_screenshot + good_line_local_coord_y + lot_number * good_line_size_y))
     mouse_click()
     move_mouse(buy_button_pos_x, (y_screenshot + lot_number * good_line_size_y + buy_button_offset_y))
     time.sleep(buy_lot_button_anim_time)
@@ -221,12 +234,27 @@ def PurchaseCheck(recognized_price):
         #logfile.write('Purchase FAILED' + '\n' + '\n')
         pass
 
+def AnalizeLastScroll():
+    move_mouse(scroller_pos_x, scroller_pos_y)
+    drag_mouse(None, scroller_pos_y + scroll_offset[-1])
+    screen = screenshot()
+    cuttedprices = CutPrices(screen)
+    if FindLowerPrice(cuttedprices):
+        #print()
+        #print('PRICE FOUNDED')
+        #print()
+        #logfile.write('\n' + 'PRICE FOUNDED' + '\n' + '\n')    
+        return(True)
+    return False
+
+def CutPrices(screenshot):
+    return cut(screenshot, x_price_offset, y_price_offset, price_size_x, price_size_y)
+
 def ClickOK():
     move_mouse(ok_button_pos_x, ok_button_pos_y)
     time.sleep(OK_time_sleep)
     mouse_click()
     
-
 def clearprice(priceRaw):
         price = ""
         for i in priceRaw:
@@ -275,7 +303,7 @@ def drag_mouse(dx, dy):
 
 
 time_start = time.time()
-time.sleep(2)
+time.sleep(0)
 iteration = 0
 
 Search()
