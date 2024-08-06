@@ -7,13 +7,18 @@ from tesserocr import PyTessBaseAPI, PSM, RIL
 import os
 import glob
 import os
+import keyboard
 
 # BOT CONTROL START
-items = ['Продвинутые запчасти', 'Тактический запас']
-items_prices = [50000, 28000]
-buyoutprice = items_prices[0]
-IsSaveImageInCache = True
-# BOT CONTROL END
+items = ['продвинутые зап', 'запас']
+items_prices = [50000, 26000]
+item_index = 0
+IsSaveImageInCache = False
+refresh_algorithm_coef = 3
+# BOT CONTROL END   
+
+buyoutprice = items_prices[item_index]
+item_name = items[item_index]
 
 lots_count = 10
 scroll_offset = [90, 180, 269, 360]
@@ -33,17 +38,35 @@ scroller_pos_x, scroller_pos_y = 1395, 335
 offsets_in_scroll_for_buy_button = [55, 45.25, 35.5, 25.75, 16]
 buy_button_pos_x, buy_button_offset_y = 1328, offsets_in_scroll_for_buy_button[0]
 ok_button_pos_x, ok_button_pos_y = 961, 570
+exit_game_button_x, exit_game_button_y = 1640, 70
+socket_exception_button_x, socket_exception_button_y = 960, 100
+join_game_button_x, join_game_button_y = 960, 860
+lot_name_window_x, lot_name_window_y = 1200, 336
+sort_lots_button_x, sort_lots_button_y = 1300, 373
 
+# PC
 search_sleep_time = 0.4
 OK_time_sleep = 0.7
-move_mouse_sleep_time = 0.02
-click_sleep_time = 0.02
-buy_lot_button_anim_time = 0.05
+move_mouse_sleep_time = 0.01
+click_sleep_time = 0.01
+buy_lot_button_anim_time = 0.02
 page_pre_load_anim_time = 0
 page_post_load_anim_time = 0.3
 refresh_page_after_click_OK_time = 0.1
-mouse_down_sleep_time = 0.02
-mouse_drag_down_sleep_time = 0.05
+mouse_down_sleep_time = 0.01
+mouse_drag_down_sleep_time = 0.03
+
+# SLOW HARDWARE
+# search_sleep_time = 0.4
+# OK_time_sleep = 0.7
+# move_mouse_sleep_time = 0.02
+# click_sleep_time = 0.02
+# buy_lot_button_anim_time = 0.05
+# page_pre_load_anim_time = 0
+# page_post_load_anim_time = 0.3
+# refresh_page_after_click_OK_time = 0.1
+# mouse_down_sleep_time = 0.02
+# mouse_drag_down_sleep_time = 0.05
 
 Page_images = []
 Page_images_touched = []
@@ -242,6 +265,7 @@ def FindPageAndScroll():
         current_scroll = 0
         buy_button_offset_y = offsets_in_scroll_for_buy_button[0]
         FindAndClickPageButton()
+        time.sleep(1)
         screen = screenshot()
         cuttedprices = CutPrices(screen)
         if FindLowerPrice(cuttedprices): 
@@ -315,28 +339,66 @@ def drag_mouse(dx, dy):
     #pyautogui.mouseUp()
     #time.sleep(mouse_down_sleep_time)
 
+def ReloadGame():
+    keyboard.press_and_release('esc')
+    time.sleep(5)
+    keyboard.press_and_release('esc')
+    time.sleep(5)
+    move_mouse(exit_game_button_x, exit_game_button_y)
+    time.sleep(1)
+    mouse_click()
+    time.sleep(5)
+    move_mouse(socket_exception_button_x, socket_exception_button_y)
+    time.sleep(1)
+    mouse_click()
+    time.sleep(5)
+    move_mouse(join_game_button_x, join_game_button_y)
+    time.sleep(1)
+    mouse_click()
+    time.sleep(10)
+    OpenAuction()
+    
+def OpenAuction():
+    keyboard.press_and_release('h')
+    time.sleep(3)
+    move_mouse(lot_name_window_x, lot_name_window_y)
+    time.sleep(1)
+    mouse_click()
+    time.sleep(1)
+    keyboard.write(item_name)
+    time.sleep(1)
+    move_mouse(sort_lots_button_x, sort_lots_button_y)
+    time.sleep(1)
+    mouse_click()
+    time.sleep(1)
+    mouse_click()
+    time.sleep(1)
 
 time_start = time.time()
 time.sleep(0)
 iteration = 0
 
-Search()
+OpenAuction()
 
 #logfile = open("log.txt", "w")
 #founded_pricec_log = open("founded_pricec_log.txt", "w")
 #price_cache_file = open("price_cache_file.txt", "w")
 
 while True:
-    iteration += 1  
+    iteration += 1
     #print("Iteration " + str(iteration))
     #print()
     #logfile.write("Iteration " + str(iteration) + '\n' + '\n')
 
-    if iteration - 1 % 100 == 0:
+    if (iteration) % (3000 * refresh_algorithm_coef) == 0:
+        ReloadGame()
+        continue
+
+    if (iteration - 1) % (100 * refresh_algorithm_coef) == 0:
         FindPageAndScroll()
         continue
 
-    if iteration % 50 == 0:
+    if iteration % (50 * refresh_algorithm_coef) == 0:
         ClickOK()
         Search()
         continue
