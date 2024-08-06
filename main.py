@@ -64,7 +64,7 @@ mouse_drag_down_sleep_time = 0.03
 # buy_lot_button_anim_time = 0.05
 # page_pre_load_anim_time = 0
 # page_post_load_anim_time = 0.3
-# refresh_page_after_click_OK_time = 0.1
+# refresh_page_after_click_OK_time = 0.3
 # mouse_down_sleep_time = 0.02
 # mouse_drag_down_sleep_time = 0.05
 
