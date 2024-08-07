@@ -14,7 +14,7 @@ items = ['продвинутые зап', 'запас']
 items_prices = [50000, 26000]
 item_index = 0
 IsSaveImageInCache = False
-refresh_algorithm_coef = 3
+refresh_algorithm_coef = 2
 # BOT CONTROL END   
 
 buyoutprice = items_prices[item_index]
@@ -43,6 +43,7 @@ socket_exception_button_x, socket_exception_button_y = 960, 100
 join_game_button_x, join_game_button_y = 960, 860
 lot_name_window_x, lot_name_window_y = 1200, 336
 sort_lots_button_x, sort_lots_button_y = 1300, 373
+auction_button_x, auction_button_y = 560, 406
 
 # PC
 search_sleep_time = 0.4
@@ -355,12 +356,16 @@ def ReloadGame():
     move_mouse(join_game_button_x, join_game_button_y)
     time.sleep(1)
     mouse_click()
-    time.sleep(10)
+    time.sleep(15)
     OpenAuction()
     
 def OpenAuction():
     keyboard.press_and_release('h')
     time.sleep(3)
+    move_mouse(auction_button_x, auction_button_y)
+    time.sleep(1)
+    mouse_click()
+    time.sleep(1)
     move_mouse(lot_name_window_x, lot_name_window_y)
     time.sleep(1)
     mouse_click()
