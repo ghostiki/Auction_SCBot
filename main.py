@@ -44,6 +44,7 @@ join_game_button_x, join_game_button_y = 960, 860
 lot_name_window_x, lot_name_window_y = 1200, 336
 sort_lots_button_x, sort_lots_button_y = 1300, 373
 auction_button_x, auction_button_y = 560, 406
+cancel_exit_button_x, cancel_exit_button_y = 1035, 647
 
 # PC
 search_sleep_time = 0.4
@@ -341,17 +342,20 @@ def drag_mouse(dx, dy):
     #time.sleep(mouse_down_sleep_time)
 
 def ReloadGame():
-    keyboard.press_and_release('esc')
-    time.sleep(5)
-    keyboard.press_and_release('esc')
-    time.sleep(5)
-    move_mouse(exit_game_button_x, exit_game_button_y)
+    time.sleep(2)
+    ClickOK()
     time.sleep(1)
-    mouse_click()
-    time.sleep(5)
-    move_mouse(socket_exception_button_x, socket_exception_button_y)
+    ClickMainMenuButton()
     time.sleep(1)
-    mouse_click()
+    ClickCancelExitButton()
+    time.sleep(1)
+    keyboard.press_and_release('esc')
+    time.sleep(3)
+    keyboard.press_and_release('esc')
+    time.sleep(3)
+    ClickExitGameButton()
+    time.sleep(5)
+    ClickMainMenuButton()
     time.sleep(5)
     move_mouse(join_game_button_x, join_game_button_y)
     time.sleep(1)
@@ -379,6 +383,21 @@ def OpenAuction():
     mouse_click()
     time.sleep(1)
 
+def ClickExitGameButton():
+    move_mouse(exit_game_button_x, exit_game_button_y)
+    time.sleep(1)
+    mouse_click()
+
+def ClickMainMenuButton():
+    move_mouse(socket_exception_button_x, socket_exception_button_y)
+    time.sleep(1)
+    mouse_click()
+
+def ClickCancelExitButton():
+    move_mouse(cancel_exit_button_x, cancel_exit_button_y)
+    time.sleep(1)
+    mouse_click()
+    
 time_start = time.time()
 time.sleep(0)
 iteration = 0
