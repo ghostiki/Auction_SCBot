@@ -304,8 +304,10 @@ def CutPrices(screenshot):
     return cut(screenshot, x_price_offset, y_price_offset, price_size_x, price_size_y)
 
 def ClickOK():
+    i = 0
     while True:
-        if(FindImage(OK_Button)): break
+        if(i >= 20 or FindImage(OK_Button)): break
+        i += 1
     mouse_move(ok_button_pos_x, ok_button_pos_y)
     mouse_click()
     
