@@ -8,10 +8,11 @@ import os
 import glob
 import os
 import keyboard
+import threading
 
 # BOT CONTROL START
 items = ['продвинутые зап', 'запас']
-items_prices = [50000, 26000]
+items_prices = [50000, 30000]
 item_index = 0
 IsSaveImageInCache = False
 refresh_algorithm_coef = 2
@@ -47,28 +48,28 @@ auction_button_x, auction_button_y = 560, 406
 cancel_exit_button_x, cancel_exit_button_y = 1035, 647
 
 # PC
-search_sleep_time = 0.4
-OK_time_sleep = 0.7
-move_mouse_sleep_time = 0.01
-click_sleep_time = 0.01
-buy_lot_button_anim_time = 0.02
-page_pre_load_anim_time = 0
-page_post_load_anim_time = 0.3
-refresh_page_after_click_OK_time = 0.1
-mouse_down_sleep_time = 0.01
-mouse_drag_down_sleep_time = 0.03
-
-# SLOW HARDWARE
 # search_sleep_time = 0.4
 # OK_time_sleep = 0.7
-# move_mouse_sleep_time = 0.02
-# click_sleep_time = 0.02
-# buy_lot_button_anim_time = 0.05
+# mouse_move_sleep_time = 0.01
+# click_sleep_time = 0.01
+# buy_lot_button_anim_time = 0.02
 # page_pre_load_anim_time = 0
 # page_post_load_anim_time = 0.3
-# refresh_page_after_click_OK_time = 0.3
-# mouse_down_sleep_time = 0.02
-# mouse_drag_down_sleep_time = 0.05
+# refresh_page_after_click_OK_time = 0.1
+# mouse_down_sleep_time = 0.01
+# mouse_drag_down_sleep_time = 0.03
+
+# SLOW HARDWARE
+search_sleep_time = 0.4
+OK_time_sleep = 0.7
+mouse_move_sleep_time = 0.02
+click_sleep_time = 0.02
+buy_lot_button_anim_time = 0.05
+page_pre_load_anim_time = 0
+page_post_load_anim_time = 0.3
+refresh_page_after_click_OK_time = 0.3
+mouse_down_sleep_time = 0.02
+mouse_drag_down_sleep_time = 0.05
 
 Page_images = []
 Page_images_touched = []
@@ -87,12 +88,19 @@ for cache_price in glob.glob(dir + '/cache_prices/*.png'):
     cache_prices.append(cache_price)
     cache_prices_images.append(cache_prices_image)
 
+SteamIcon = Image.open(dir + '/Images/SteamIcon.png')
+SteamPlayButton = Image.open(dir + '/Images/SteamPlayButton.png')
+SC_WindowName = Image.open(dir + '/Images/SC_WindowName.png')
+OK_Button = Image.open(dir + '/Images/OK_Button.png')
+BuyLot_Button = Image.open(dir + '/Images/BuyLot_Button.png')
+SC_Icon = Image.open(dir + '/Images/SC_Icon.png')
+
 PageButtonCoords = []
 page = 0
 current_scroll = 0
 
 def Search():
-    move_mouse(search_button_position_x, search_button_position_y)
+    mouse_move(search_button_position_x, search_button_position_y)
     pyautogui.click()
     time.sleep(search_sleep_time)
 
@@ -145,7 +153,7 @@ def FindAndClickPageButton():
         except:
             PageButtonCoords = pyautogui.center(pyautogui.locateOnScreen(Page_images[page], First_page_coords))
 
-        move_mouse(PageButtonCoords[0], PageButtonCoords[1])
+        mouse_move(PageButtonCoords[0], PageButtonCoords[1])
         mouse_click()
 
         time.sleep(page_post_load_anim_time)
@@ -156,7 +164,7 @@ def FindAndClickPageButton():
 
 def AnalizePage():
     if (current_scroll != 0):
-        move_mouse(scroller_pos_x, scroller_pos_y)
+        mouse_move(scroller_pos_x, scroller_pos_y)
         drag_mouse(None, scroller_pos_y + scroll_offset[current_scroll - 1])
 
     screen = screenshot()
@@ -192,7 +200,7 @@ def FindLowerPrice(prices_images):
             #print("text on image = " + recognized_price)
             #logfile.write("text on image = " + recognized_price + '\n')
 
-            recognized_price = clearprice(recognized_price)
+            recognized_price = ClearPrice(recognized_price)
 
             cache_prices.append(recognized_price)
             #price_cache_file.write(str(recognized_price) + '\n')
@@ -224,9 +232,15 @@ def SaveImageInCache(image, price):
         image.save('cache_prices/' + str(price) + '.png')
 
 def BuyLot(lot_number, recognized_price):
-    move_mouse(x_screenshot + good_line_local_coord_x, (y_screenshot + good_line_local_coord_y + lot_number * good_line_size_y))
+    mouse_move(x_screenshot, (y_screenshot + good_line_local_coord_y + lot_number * good_line_size_y))
     mouse_click()
-    move_mouse(buy_button_pos_x, (y_screenshot + lot_number * good_line_size_y + buy_button_offset_y))
+    
+    # i = 0
+    # while True:
+    #     if (FindImage(BuyLot_Button) or i >= 20): break
+    #     i += 1
+
+    mouse_move(buy_button_pos_x, (y_screenshot + lot_number * good_line_size_y + buy_button_offset_y))
     time.sleep(buy_lot_button_anim_time)
     mouse_click()
     #PurchaseCheck(recognized_price)
@@ -245,7 +259,7 @@ def PurchaseCheck(recognized_price):
         pass
 
 def AnalizeLastScroll():
-    move_mouse(scroller_pos_x, scroller_pos_y)
+    mouse_move(scroller_pos_x, scroller_pos_y)
     drag_mouse(None, scroller_pos_y + scroll_offset[-1])
     screen = screenshot()
     cuttedprices = CutPrices(screen)
@@ -272,7 +286,7 @@ def FindPageAndScroll():
         cuttedprices = CutPrices(screen)
         if FindLowerPrice(cuttedprices): 
             break
-        move_mouse(scroller_pos_x, scroller_pos_y)
+        mouse_move(scroller_pos_x, scroller_pos_y)
         for i in range(len(scroll_offset)):
             current_scroll += 1
             buy_button_offset_y = offsets_in_scroll_for_buy_button[i + 1]
@@ -291,11 +305,12 @@ def CutPrices(screenshot):
     return cut(screenshot, x_price_offset, y_price_offset, price_size_x, price_size_y)
 
 def ClickOK():
-    move_mouse(ok_button_pos_x, ok_button_pos_y)
-    time.sleep(OK_time_sleep)
+    mouse_move(ok_button_pos_x, ok_button_pos_y)
+    while True:
+        if(FindImage(OK_Button)): break
     mouse_click()
     
-def clearprice(priceRaw):
+def ClearPrice(priceRaw):
         price = ""
         for i in priceRaw:
             try:
@@ -309,9 +324,9 @@ def clearprice(priceRaw):
             return (-1)
 
 
-def move_mouse(x, y):
+def mouse_move(x, y):
     pyautogui.moveTo(x, y)
-    time.sleep(move_mouse_sleep_time)
+    time.sleep(mouse_move_sleep_time)
 
 def mouse_click():
     pyautogui.click()
@@ -357,7 +372,7 @@ def ReloadGame():
     time.sleep(5)
     ClickMainMenuButton()
     time.sleep(5)
-    move_mouse(join_game_button_x, join_game_button_y)
+    mouse_move(join_game_button_x, join_game_button_y)
     time.sleep(1)
     mouse_click()
     time.sleep(15)
@@ -366,17 +381,17 @@ def ReloadGame():
 def OpenAuction():
     keyboard.press_and_release('h')
     time.sleep(3)
-    move_mouse(auction_button_x, auction_button_y)
+    mouse_move(auction_button_x, auction_button_y)
     time.sleep(1)
     mouse_click()
     time.sleep(1)
-    move_mouse(lot_name_window_x, lot_name_window_y)
+    mouse_move(lot_name_window_x, lot_name_window_y)
     time.sleep(1)
     mouse_click()
     time.sleep(1)
     keyboard.write(item_name)
     time.sleep(1)
-    move_mouse(sort_lots_button_x, sort_lots_button_y)
+    mouse_move(sort_lots_button_x, sort_lots_button_y)
     time.sleep(1)
     mouse_click()
     time.sleep(1)
@@ -384,59 +399,113 @@ def OpenAuction():
     time.sleep(1)
 
 def ClickExitGameButton():
-    move_mouse(exit_game_button_x, exit_game_button_y)
+    mouse_move(exit_game_button_x, exit_game_button_y)
     time.sleep(1)
     mouse_click()
 
 def ClickMainMenuButton():
-    move_mouse(socket_exception_button_x, socket_exception_button_y)
+    mouse_move(socket_exception_button_x, socket_exception_button_y)
     time.sleep(1)
     mouse_click()
 
 def ClickCancelExitButton():
-    move_mouse(cancel_exit_button_x, cancel_exit_button_y)
+    mouse_move(cancel_exit_button_x, cancel_exit_button_y)
     time.sleep(1)
     mouse_click()
+
+def PressALT_F4():
+    keyboard.press('alt')
+    keyboard.press('f4')
+    keyboard.release('f4')
+    keyboard.release('alt')
+
+def FindAndClickImage(IconImage):
+    try:
+        IconCoords = pyautogui.locateCenterOnScreen(IconImage)
+        mouse_move(IconCoords[0], IconCoords[1])
+        mouse_click()
+        return True
+    except:
+        return False
     
-time_start = time.time()
-time.sleep(0)
-iteration = 0
-
-OpenAuction()
-
-#logfile = open("log.txt", "w")
-#founded_pricec_log = open("founded_pricec_log.txt", "w")
-#price_cache_file = open("price_cache_file.txt", "w")
-
-while True:
-    iteration += 1
-    #print("Iteration " + str(iteration))
-    #print()
-    #logfile.write("Iteration " + str(iteration) + '\n' + '\n')
-
-    if (iteration) % (3000 * refresh_algorithm_coef) == 0:
-        ReloadGame()
-        continue
-
-    if (iteration - 1) % (100 * refresh_algorithm_coef) == 0:
-        FindPageAndScroll()
-        continue
-
-    if iteration % (50 * refresh_algorithm_coef) == 0:
-        ClickOK()
-        Search()
-        continue
+def FindImage(IconImage):
+    try:
+        pyautogui.locateCenterOnScreen(IconImage)
+        return True
+    except:
+        return False
     
-    if (not FindAndClickPageButton()) : continue
+def CheckSCIsRunning():
+    return(FindImage(SC_Icon))
 
-    AnalizePage()
+def RestartGame():
+    if (CheckSCIsRunning()):
+        PressALT_F4()
+    while(True):
+        FindAndClickImage(SteamIcon)
+        if(FindAndClickImage(SteamPlayButton)): break
+    while(True):
+        if(FindImage(SC_WindowName)): break
+    time.sleep(5)
+    mouse_move(join_game_button_x, join_game_button_y)
+    time.sleep(1)
+    mouse_click()
+    time.sleep(15)
+    OpenAuction()
 
-    #ClickPageButton(PageButtonCoords[0], PageButtonCoords[1])
+def key_listener():
+    global running
+    keyboard.wait('f5') 
+    running = False
 
-    #screenshot().save("priceicons/priceicon_iteration" + str(iteration) + ".jpg")
-    #logfile.flush()
-    #os.fsync(logfile.fileno())
-    #founded_pricec_log.flush()
-    #os.fsync(founded_pricec_log.fileno())
-    #price_cache_file.flush()
-    #os.fsync(price_cache_file.fileno())
+def main():
+    global running
+    iteration = 0
+
+    OpenAuction()
+
+    #logfile = open("log.txt", "w")
+    #founded_pricec_log = open("founded_pricec_log.txt", "w")
+    #price_cache_file = open("price_cache_file.txt", "w")
+
+    while running:
+        iteration += 1
+        #print("Iteration " + str(iteration))
+        #print()
+        #logfile.write("Iteration " + str(iteration) + '\n' + '\n')
+        
+        if (iteration) % (3000 * refresh_algorithm_coef) == 0:
+            RestartGame()
+            continue
+
+        if (iteration - 1) % (100 * refresh_algorithm_coef) == 0:
+            FindPageAndScroll()
+            continue
+
+        if iteration % (50 * refresh_algorithm_coef) == 0:
+            Search()
+            continue
+        
+        if (not FindAndClickPageButton()) : continue
+
+        AnalizePage()
+
+        #ClickPageButton(PageButtonCoords[0], PageButtonCoords[1])
+
+        #screenshot().save("priceicons/priceicon_iteration" + str(iteration) + ".jpg")
+        #logfile.flush()
+        #os.fsync(logfile.fileno())
+        #founded_pricec_log.flush()
+        #os.fsync(founded_pricec_log.fileno())
+        #price_cache_file.flush()
+        #os.fsync(price_cache_file.fileno())
+
+if __name__ == "__main__":
+    running = True
+
+    key_thread = threading.Thread(target=key_listener)
+    key_thread.start()
+
+    main()
+
+    key_thread.join()
