@@ -13,7 +13,7 @@ import threading
 # BOT CONTROL START
 items = ['продвинутые зап', 'запас']
 items_prices = [50000, 30000]
-item_index = 0
+item_index = 1
 IsSaveImageInCache = False
 refresh_algorithm_coef = 2
 # BOT CONTROL END   
@@ -281,7 +281,6 @@ def FindPageAndScroll():
         current_scroll = 0
         buy_button_offset_y = offsets_in_scroll_for_buy_button[0]
         FindAndClickPageButton()
-        time.sleep(1)
         screen = screenshot()
         cuttedprices = CutPrices(screen)
         if FindLowerPrice(cuttedprices): 
@@ -326,7 +325,6 @@ def ClearPrice(priceRaw):
 
 def mouse_move(x, y):
     pyautogui.moveTo(x, y)
-    time.sleep(mouse_move_sleep_time)
 
 def mouse_click():
     pyautogui.click()
@@ -380,23 +378,17 @@ def ReloadGame():
     
 def OpenAuction():
     keyboard.press_and_release('h')
-    time.sleep(3)
+    time.sleep(2)
     mouse_move(auction_button_x, auction_button_y)
-    time.sleep(1)
     mouse_click()
-    time.sleep(1)
     mouse_move(lot_name_window_x, lot_name_window_y)
-    time.sleep(1)
     mouse_click()
-    time.sleep(1)
     keyboard.write(item_name)
     time.sleep(1)
     mouse_move(sort_lots_button_x, sort_lots_button_y)
-    time.sleep(1)
     mouse_click()
     time.sleep(1)
     mouse_click()
-    time.sleep(1)
 
 def ClickExitGameButton():
     mouse_move(exit_game_button_x, exit_game_button_y)
@@ -448,7 +440,6 @@ def RestartGame():
         if(FindImage(SC_WindowName)): break
     time.sleep(5)
     mouse_move(join_game_button_x, join_game_button_y)
-    time.sleep(1)
     mouse_click()
     time.sleep(15)
     OpenAuction()
