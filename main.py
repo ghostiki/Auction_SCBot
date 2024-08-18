@@ -12,8 +12,8 @@ import threading
 
 # BOT CONTROL START
 items = ['продвинутые зап', 'запас']
-items_prices = [50000, 30000]
-item_index = 1
+items_prices = [52000, 30000]
+item_index = 0
 IsSaveImageInCache = False
 refresh_algorithm_coef = 2
 # BOT CONTROL END   
@@ -476,6 +476,7 @@ def main():
             continue
 
         if iteration % (50 * refresh_algorithm_coef) == 0:
+            ClickOK()
             Search()
             continue
         
