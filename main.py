@@ -381,17 +381,23 @@ def ReloadGame():
     
 def OpenAuction():
     keyboard.press_and_release('h')
-    time.sleep(2)
+    time.sleep(3)
     mouse_move(auction_button_x, auction_button_y)
+    time.sleep(0.5)
     mouse_click()
+    time.sleep(0.5)
     mouse_move(lot_name_window_x, lot_name_window_y)
+    time.sleep(0.5)
     mouse_click()
+    time.sleep(0.5)
     keyboard.write(item_name)
     time.sleep(1)
     mouse_move(sort_lots_button_x, sort_lots_button_y)
+    time.sleep(0.5)
     mouse_click()
     time.sleep(1)
     mouse_click()
+    time.sleep(1)
 
 def ClickExitGameButton():
     mouse_move(exit_game_button_x, exit_game_button_y)
