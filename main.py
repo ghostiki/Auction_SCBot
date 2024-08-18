@@ -90,6 +90,7 @@ for cache_price in glob.glob(dir + '/cache_prices/*.png'):
 
 SteamIcon = Image.open(dir + '/Images/SteamIcon.png')
 SteamPlayButton = Image.open(dir + '/Images/SteamPlayButton.png')
+SteamPlayButton_Nout = Image.open(dir + '/Images/SteamPlayButton_Nout.png')
 SC_WindowName = Image.open(dir + '/Images/SC_WindowName.png')
 OK_Button = Image.open(dir + '/Images/OK_Button.png')
 BuyLot_Button = Image.open(dir + '/Images/BuyLot_Button.png')
@@ -438,6 +439,7 @@ def RestartGame():
     while(True):
         FindAndClickImage(SteamIcon)
         if(FindAndClickImage(SteamPlayButton)): break
+        if(FindAndClickImage(SteamPlayButton_Nout)): break
     while(True):
         if(FindImage(SC_WindowName)): break
     time.sleep(5)
