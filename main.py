@@ -304,9 +304,9 @@ def CutPrices(screenshot):
     return cut(screenshot, x_price_offset, y_price_offset, price_size_x, price_size_y)
 
 def ClickOK():
-    mouse_move(ok_button_pos_x, ok_button_pos_y)
     while True:
         if(FindImage(OK_Button)): break
+    mouse_move(ok_button_pos_x, ok_button_pos_y)
     mouse_click()
     
 def ClearPrice(priceRaw):
