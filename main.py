@@ -470,7 +470,7 @@ def main():
             RestartGame()
             continue
 
-        if (iteration - 1) % (25 * refresh_algorithm_coef) == 0:
+        if (iteration - 1) % (25) == 0:
             ClickOK()
             FindPageAndScroll()
             continue
