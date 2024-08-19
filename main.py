@@ -48,28 +48,28 @@ auction_button_x, auction_button_y = 560, 406
 cancel_exit_button_x, cancel_exit_button_y = 1035, 647
 
 # PC
-# search_sleep_time = 0.4
-# OK_time_sleep = 0.7
-# mouse_move_sleep_time = 0.01
-# click_sleep_time = 0.01
-# buy_lot_button_anim_time = 0.02
-# page_pre_load_anim_time = 0
-# page_post_load_anim_time = 0.3
-# refresh_page_after_click_OK_time = 0.1
-# mouse_down_sleep_time = 0.01
-# mouse_drag_down_sleep_time = 0.03
-
-# SLOW HARDWARE
 search_sleep_time = 0.4
 OK_time_sleep = 0.7
-mouse_move_sleep_time = 0.02
-click_sleep_time = 0.02
-buy_lot_button_anim_time = 0.05
+mouse_move_sleep_time = 0.01
+click_sleep_time = 0.01
+buy_lot_button_anim_time = 0.02
 page_pre_load_anim_time = 0
 page_post_load_anim_time = 0.3
-refresh_page_after_click_OK_time = 0.3
-mouse_down_sleep_time = 0.02
-mouse_drag_down_sleep_time = 0.05
+refresh_page_after_click_OK_time = 0.1
+mouse_down_sleep_time = 0.01
+mouse_drag_down_sleep_time = 0.03
+
+# SLOW HARDWARE
+# search_sleep_time = 0.4
+# OK_time_sleep = 0.7
+# mouse_move_sleep_time = 0.02
+# click_sleep_time = 0.02
+# buy_lot_button_anim_time = 0.05
+# page_pre_load_anim_time = 0
+# page_post_load_anim_time = 0.3
+# refresh_page_after_click_OK_time = 0.3
+# mouse_down_sleep_time = 0.02
+# mouse_drag_down_sleep_time = 0.05
 
 Page_images = []
 Page_images_touched = []
@@ -97,8 +97,9 @@ BuyLot_Button = Image.open(dir + '/Images/BuyLot_Button.png')
 SC_Icon = Image.open(dir + '/Images/SC_Icon.png')
 
 PageButtonCoords = []
-page = 0
+current_page = 0
 current_scroll = 0
+current_lot = 0
 
 def Search():
     mouse_move(search_button_position_x, search_button_position_y)
@@ -150,9 +151,9 @@ def FindAndClickPageButton():
         time.sleep(page_pre_load_anim_time)
 
         try:
-            PageButtonCoords = pyautogui.center(pyautogui.locateOnScreen(Page_images_touched[page], First_page_coords))
+            PageButtonCoords = pyautogui.center(pyautogui.locateOnScreen(Page_images_touched[current_page], First_page_coords))
         except:
-            PageButtonCoords = pyautogui.center(pyautogui.locateOnScreen(Page_images[page], First_page_coords))
+            PageButtonCoords = pyautogui.center(pyautogui.locateOnScreen(Page_images[current_page], First_page_coords))
 
         mouse_move(PageButtonCoords[0], PageButtonCoords[1])
         mouse_click()
@@ -170,62 +171,65 @@ def AnalizePage():
 
     screen = screenshot()
     cuttedprices = CutPrices(screen)
-    if FindLowerPrice(cuttedprices):
-        #print()
-        #print('PRICE FOUNDED')
-        #print()
-        #logfile.write('\n' + 'PRICE FOUNDED' + '\n' + '\n')    
-        return(True)
+    return TryBuyLot(cuttedprices[current_lot])
+
+def DetermineImageValue(Image):
+    try:
+        index = cache_prices_images.index(Image)
+        recognized_price = cache_prices[index]
+    except:
+        cache_prices_images.append(Image)
+
+        priceicon = preprocess_image(np.array(Image), (512, 150))
+        recognized_price = recognize_image(priceicon, 7, '').strip()
+        
+        #print("text on image = " + recognized_price)
+        #logfile.write("text on image = " + recognized_price + '\n')
+
+        recognized_price = ClearPrice(recognized_price)
+
+        cache_prices.append(recognized_price)
+        #price_cache_file.write(str(recognized_price) + '\n')
+
+        SaveImageInCache(Image, recognized_price)
+    return recognized_price
+
+def TryBuyLot(image):
+    recognized_price = DetermineImageValue(image)
+
+    if recognized_price == -1:
+        FindPageAndScroll()
+        return False
+    if recognized_price > buyoutprice: return False
 
     #print()
-    #print('!!! PAGE IS EMPTY !!!')
+    #print("!!! LOWER PRICE FOUNDED !!! " + str(recognized_price) + " rub")
     #print()
-    #logfile.write('\n' + "!!! PAGE IS EMPTY !!!" + '\n' + '\n')
-    #founded_pricec_log.write('\n' + "!!! PAGE IS EMPTY !!!" + '\n' + '\n')
-    return False
+    #logfile.write('\n' + "!!! LOWER PRICE FOUNDED !!! " + str(recognized_price) + " rub" + '\n' + '\n')
+    #founded_pricec_log.write(str(recognized_price) + ' iteration_' + str(iteration) + "_priceicon_" + str(i) + '\n')
 
-def FindLowerPrice(prices_images):
+    #priceicon.save("priceicons/priceicon_iteration_" + str(iteration) + "_priceicon_" + str(i) + ".jpg")
+
+    BuyLot(current_lot, recognized_price)
+    return True
+
+
+def FindFirstLotWithPrice(prices_images):
+    global current_lot
+
     for i in range(len(prices_images)):
+        current_lot = i
         #print("Price number  " + str(i))
         #logfile.write("Price number  " + str(i) + '\n')
 
-        try:
-            index = cache_prices_images.index(prices_images[i])
-            recognized_price = cache_prices[index]
-        except:
-            cache_prices_images.append(prices_images[i])
-
-            priceicon = preprocess_image(np.array(prices_images[i]), (512, 150))
-            recognized_price = recognize_image(priceicon, 7, '').strip()
-        
-            #print("text on image = " + recognized_price)
-            #logfile.write("text on image = " + recognized_price + '\n')
-
-            recognized_price = ClearPrice(recognized_price)
-
-            cache_prices.append(recognized_price)
-            #price_cache_file.write(str(recognized_price) + '\n')
-
-            SaveImageInCache(prices_images[i], recognized_price)
+        recognized_price = DetermineImageValue(prices_images[i])
 
         #print("int on image = " + str(recognized_price))
         #logfile.write("int on image = " + str(recognized_price) + '\n' + '\n')
 
         #priceicon.save("priceicons/priceicon_iteration_" + str(iteration) + "_priceicon_" + str(i) + ".jpg")
         if recognized_price == -1: continue
-
-        if recognized_price > buyoutprice: return(True)
-
-        #print()
-        #print("!!! LOWER PRICE FOUNDED !!! " + str(recognized_price) + " rub")
-        #print()
-        #logfile.write('\n' + "!!! LOWER PRICE FOUNDED !!! " + str(recognized_price) + " rub" + '\n' + '\n')
-        #founded_pricec_log.write(str(recognized_price) + ' iteration_' + str(iteration) + "_priceicon_" + str(i) + '\n')
-
-        #priceicon.save("priceicons/priceicon_iteration_" + str(iteration) + "_priceicon_" + str(i) + ".jpg")
-
-        BuyLot(i, recognized_price)
-        return(True)
+        return True
     return False
 
 def SaveImageInCache(image, price):
@@ -242,7 +246,7 @@ def BuyLot(lot_number, recognized_price):
     #     i += 1
 
     mouse_move(buy_button_pos_x, (y_screenshot + lot_number * good_line_size_y + buy_button_offset_y))
-    time.sleep(buy_lot_button_anim_time)
+    #time.sleep(buy_lot_button_anim_time)
     mouse_click()
     #PurchaseCheck(recognized_price)
     ClickOK()
@@ -259,32 +263,19 @@ def PurchaseCheck(recognized_price):
         #logfile.write('Purchase FAILED' + '\n' + '\n')
         pass
 
-def AnalizeLastScroll():
-    mouse_move(scroller_pos_x, scroller_pos_y)
-    drag_mouse(None, scroller_pos_y + scroll_offset[-1])
-    screen = screenshot()
-    cuttedprices = CutPrices(screen)
-    if FindLowerPrice(cuttedprices):
-        #print()
-        #print('PRICE FOUNDED')
-        #print()
-        #logfile.write('\n' + 'PRICE FOUNDED' + '\n' + '\n')    
-        return(True)
-    return False
-
 def FindPageAndScroll():
     global buy_button_offset_y
-    global page
+    global current_page
     global current_scroll
 
     for i in range(len(Page_images)):
-        page = i
+        current_page = i
         current_scroll = 0
         buy_button_offset_y = offsets_in_scroll_for_buy_button[0]
         FindAndClickPageButton()
         screen = screenshot()
         cuttedprices = CutPrices(screen)
-        if FindLowerPrice(cuttedprices): 
+        if FindFirstLotWithPrice(cuttedprices): 
             break
         mouse_move(scroller_pos_x, scroller_pos_y)
         for i in range(len(scroll_offset)):
@@ -293,7 +284,7 @@ def FindPageAndScroll():
             drag_mouse(None, scroller_pos_y + scroll_offset[i])
             screen = screenshot()
             cuttedprices = CutPrices(screen)
-            if FindLowerPrice(cuttedprices): 
+            if FindFirstLotWithPrice(cuttedprices): 
                 break
         else:
             continue
@@ -479,13 +470,9 @@ def main():
             RestartGame()
             continue
 
-        if (iteration - 1) % (100 * refresh_algorithm_coef) == 0:
-            FindPageAndScroll()
-            continue
-
-        if iteration % (50 * refresh_algorithm_coef) == 0:
+        if (iteration - 1) % (25 * refresh_algorithm_coef) == 0:
             ClickOK()
-            Search()
+            FindPageAndScroll()
             continue
         
         if (not FindAndClickPageButton()) : continue
