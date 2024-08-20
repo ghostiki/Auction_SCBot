@@ -12,7 +12,7 @@ import threading
 
 # BOT CONTROL START
 items = ['продвинутые зап', 'запас']
-items_prices = [52000, 30000]
+items_prices = [53000, 30000]
 item_index = 0
 IsSaveImageInCache = False
 refresh_algorithm_coef = 2
@@ -295,13 +295,16 @@ def FindPageAndScroll():
 def CutPrices(screenshot):
     return cut(screenshot, x_price_offset, y_price_offset, price_size_x, price_size_y)
 
+def ClickOK_Position():
+    mouse_move(ok_button_pos_x, ok_button_pos_y)
+    mouse_click()
+
 def ClickOK():
     i = 0
     while True:
         if(i >= 20 or FindImage(OK_Button)): break
         i += 1
-    mouse_move(ok_button_pos_x, ok_button_pos_y)
-    mouse_click()
+    ClickOK_Position()
     
 def ClearPrice(priceRaw):
         price = ""
@@ -471,7 +474,7 @@ def main():
             continue
 
         if (iteration - 1) % (25) == 0:
-            ClickOK()
+            ClickOK_Position()
             FindPageAndScroll()
             continue
         
