@@ -12,7 +12,7 @@ import threading
 
 # BOT CONTROL START
 items = ['продвинутые зап', 'запас']
-items_prices = [53000, 30000]
+items_prices = [50000, 30000]
 item_index = 0
 IsSaveImageInCache = False
 refresh_algorithm_coef = 2
@@ -42,10 +42,11 @@ ok_button_pos_x, ok_button_pos_y = 961, 570
 exit_game_button_x, exit_game_button_y = 1640, 70
 socket_exception_button_x, socket_exception_button_y = 960, 100
 join_game_button_x, join_game_button_y = 960, 860
-lot_name_window_x, lot_name_window_y = 1200, 336
+lot_name_window_x, lot_name_window_y = 1272, 336
 sort_lots_button_x, sort_lots_button_y = 1300, 373
 auction_button_x, auction_button_y = 560, 406
 cancel_exit_button_x, cancel_exit_button_y = 1035, 647
+lot_pos_x = 1272
 
 # PC
 search_sleep_time = 0.4
@@ -198,7 +199,7 @@ def TryBuyLot(image):
     recognized_price = DetermineImageValue(image)
 
     if recognized_price == -1:
-        FindPageAndScroll()
+        #FindPageAndScroll()
         return False
     if recognized_price > buyoutprice: return False
 
@@ -237,7 +238,7 @@ def SaveImageInCache(image, price):
         image.save('cache_prices/' + str(price) + '.png')
 
 def BuyLot(lot_number, recognized_price):
-    mouse_move(x_screenshot, (y_screenshot + good_line_local_coord_y + lot_number * good_line_size_y))
+    mouse_move(lot_pos_x, (y_screenshot + good_line_local_coord_y + lot_number * good_line_size_y))
     mouse_click()
     
     # i = 0
@@ -273,6 +274,7 @@ def FindPageAndScroll():
         current_scroll = 0
         buy_button_offset_y = offsets_in_scroll_for_buy_button[0]
         FindAndClickPageButton()
+        time.sleep(1)
         screen = screenshot()
         cuttedprices = CutPrices(screen)
         if FindFirstLotWithPrice(cuttedprices): 
@@ -297,6 +299,7 @@ def CutPrices(screenshot):
 
 def ClickOK_Position():
     mouse_move(ok_button_pos_x, ok_button_pos_y)
+    time.sleep(0.1)
     mouse_click()
 
 def ClickOK():
@@ -418,6 +421,7 @@ def FindAndClickImage(IconImage):
     try:
         IconCoords = pyautogui.locateCenterOnScreen(IconImage)
         mouse_move(IconCoords[0], IconCoords[1])
+        time.sleep(1)
         mouse_click()
         return True
     except:
