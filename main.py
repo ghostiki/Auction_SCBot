@@ -12,8 +12,8 @@ import threading
 
 # BOT CONTROL START
 items = ['продвинутые зап', 'запас']
-items_prices = [50000, 30000]
-item_index = 0
+items_prices = [50000, 32000]
+item_index = 1
 IsSaveImageInCache = False
 refresh_algorithm_coef = 2
 # BOT CONTROL END   
@@ -458,6 +458,7 @@ def RestartGame():
     mouse_click()
     time.sleep(15)
     ClickContinueButton()
+    time.sleep(1)
     OpenAuction()
 
 def key_listener():
