@@ -47,6 +47,7 @@ sort_lots_button_x, sort_lots_button_y = 1300, 373
 auction_button_x, auction_button_y = 560, 406
 cancel_exit_button_x, cancel_exit_button_y = 1035, 647
 lot_pos_x = 1272
+continue_pos_x, continue_pos_y = 960, 775
 
 # PC
 search_sleep_time = 0.4
@@ -437,6 +438,11 @@ def FindImage(IconImage):
 def CheckSCIsRunning():
     return(FindImage(SC_Icon))
 
+def ClickContinueButton():
+    mouse_move(continue_pos_x, continue_pos_y)
+    time.sleep(0.3)
+    mouse_click()   
+
 def RestartGame():
     if (CheckSCIsRunning()):
         PressALT_F4()
@@ -448,8 +454,10 @@ def RestartGame():
         if(FindImage(SC_WindowName)): break
     time.sleep(5)
     mouse_move(join_game_button_x, join_game_button_y)
+    time.sleep(0.3)
     mouse_click()
     time.sleep(15)
+    ClickContinueButton()
     OpenAuction()
 
 def key_listener():
