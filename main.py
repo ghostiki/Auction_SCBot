@@ -9,11 +9,12 @@ import glob
 import os
 import keyboard
 import threading
+import subprocess
 
 # BOT CONTROL START
-items = ['продвинутые зап', 'запас']
-items_prices = [50000, 32000]
-item_index = 1
+items = ['продвинутые зап', 'черный презент']
+items_prices = [50000, 70000]
+item_index = 0
 IsSaveImageInCache = False
 refresh_algorithm_coef = 2
 # BOT CONTROL END   
@@ -31,7 +32,7 @@ dir = os.path.dirname(os.path.abspath(__file__))
 #x_price_offset, y_price_offset, price_size_x, price_size_y = 355, 2, 135, 30
 #good_line_size_y = 36
 x_screenshot, y_screenshot, screenshot_size_x, screenshot_size_y = 1240, 385, 135, 370
-x_price_offset, y_price_offset, price_size_x, price_size_y = 0, 2, 135, 30
+x_price_offset, y_price_offset, price_size_x, price_size_y = 5, 2, 135, 30
 good_line_size_y = 37
 good_line_local_coord_x, good_line_local_coord_y = screenshot_size_x / 2, good_line_size_y / 2
 search_button_position_x, search_button_position_y = 1337, 337
@@ -102,6 +103,10 @@ PageButtonCoords = []
 current_page = 0
 current_scroll = 0
 current_lot = 0
+
+steam_app_id = "1818450" 
+steam_path = "C:/Other/Steam/steam.exe"
+command = [steam_path, "-applaunch", steam_app_id]
 
 def Search():
     mouse_move(search_button_position_x, search_button_position_y)
@@ -415,6 +420,7 @@ def ClickCancelExitButton():
 def PressALT_F4():
     keyboard.press('alt')
     keyboard.press('f4')
+    time.sleep(0.5)
     keyboard.release('f4')
     keyboard.release('alt')
 
@@ -446,6 +452,8 @@ def ClickContinueButton():
 def RestartGame():
     if (CheckSCIsRunning()):
         PressALT_F4()
+    #time.sleep(5)
+    #subprocess.run(command)
     while(True):
         FindAndClickImage(SteamIcon)
         if(FindAndClickImage(SteamPlayButton)): break
