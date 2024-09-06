@@ -13,10 +13,11 @@ import subprocess
 
 # BOT CONTROL START
 items = ['продвинутые зап', 'черный презент']
-items_prices = [50000, 70000]
+items_prices = [70000, 80000]
 item_index = 0
 IsSaveImageInCache = False
 refresh_algorithm_coef = 2
+steam_path = "C:/Other/Steam/steam.exe"
 # BOT CONTROL END   
 
 buyoutprice = items_prices[item_index]
@@ -105,7 +106,6 @@ current_scroll = 0
 current_lot = 0
 
 steam_app_id = "1818450" 
-steam_path = "C:/Other/Steam/steam.exe"
 command = [steam_path, "-applaunch", steam_app_id]
 
 def Search():
@@ -452,15 +452,15 @@ def ClickContinueButton():
 def RestartGame():
     if (CheckSCIsRunning()):
         PressALT_F4()
-    #time.sleep(5)
-    #subprocess.run(command)
-    while(True):
-        FindAndClickImage(SteamIcon)
-        if(FindAndClickImage(SteamPlayButton)): break
-        if(FindAndClickImage(SteamPlayButton_Nout)): break
+    time.sleep(10)
+    subprocess.run(command)
+    # while(True):
+    #     FindAndClickImage(SteamIcon)
+    #     if(FindAndClickImage(SteamPlayButton)): break
+    #     if(FindAndClickImage(SteamPlayButton_Nout)): break
     while(True):
         if(FindImage(SC_WindowName)): break
-    time.sleep(5)
+    time.sleep(10)
     mouse_move(join_game_button_x, join_game_button_y)
     time.sleep(0.3)
     mouse_click()
