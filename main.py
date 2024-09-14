@@ -13,9 +13,9 @@ import subprocess
 
 # BOT CONTROL START
 items = ['продвинутые зап', 'черный презент']
-items_prices = [70000, 80000]
+items_prices = [80000, 60000]
 item_index = 0
-IsSaveImageInCache = False
+IsSaveImageInCache = True
 refresh_algorithm_coef = 2
 steam_path = "C:/Other/Steam/steam.exe"
 # BOT CONTROL END   
@@ -58,7 +58,7 @@ mouse_move_sleep_time = 0.01
 click_sleep_time = 0.01
 buy_lot_button_anim_time = 0.02
 page_pre_load_anim_time = 0
-page_post_load_anim_time = 0.3
+page_post_load_anim_time = 0.2
 refresh_page_after_click_OK_time = 0.1
 mouse_down_sleep_time = 0.01
 mouse_drag_down_sleep_time = 0.03
@@ -107,6 +107,8 @@ current_lot = 0
 
 steam_app_id = "1818450" 
 command = [steam_path, "-applaunch", steam_app_id]
+
+#pyautogui.PAUSE = 0.001
 
 def Search():
     mouse_move(search_button_position_x, search_button_position_y)
@@ -311,7 +313,7 @@ def ClickOK_Position():
 def ClickOK():
     i = 0
     while True:
-        if(i >= 20 or FindImage(OK_Button)): break
+        if(i >= 10 or FindImage(OK_Button)): break
         i += 1
     ClickOK_Position()
     
@@ -330,7 +332,7 @@ def ClearPrice(priceRaw):
 
 
 def mouse_move(x, y):
-    pyautogui.moveTo(x, y)
+    pyautogui.moveTo(x, y, _pause = 0.01)
 
 def mouse_click():
     pyautogui.click()
@@ -494,7 +496,7 @@ def main():
             RestartGame()
             continue
 
-        if (iteration - 1) % (25) == 0:
+        if (iteration - 1) % (25 * refresh_algorithm_coef) == 0:
             ClickOK_Position()
             FindPageAndScroll()
             continue
