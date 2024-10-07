@@ -13,9 +13,10 @@ import subprocess
 
 # BOT CONTROL START
 items = ['продвинутые зап', 'черный презент']
-items_prices = [80000, 60000]
+items_prices = [85000, 48000]
 item_index = 0
-IsSaveImageInCache = True
+IsUseCache = True
+IsSaveImageInCache = False
 refresh_algorithm_coef = 2
 steam_path = "C:/Other/Steam/steam.exe"
 # BOT CONTROL END   
@@ -78,6 +79,8 @@ mouse_drag_down_sleep_time = 0.03
 Page_images = []
 Page_images_touched = []
 
+if not IsUseCache: IsSaveImageInCache = False
+
 for page_icon in glob.glob(dir + '/Pages/*.png'):
     Page_images.append(Image.open(page_icon))
 for page_touched_icon in glob.glob(dir + '/Pages_touched/*.png'):
@@ -87,10 +90,11 @@ First_page_coords = (980, 755, 170, 25)
 
 cache_prices = []
 cache_prices_images = []
-for cache_price in glob.glob(dir + '/cache_prices/*.png'):
-    cache_prices_image = Image.open(cache_price)
-    cache_prices.append(cache_price)
-    cache_prices_images.append(cache_prices_image)
+if IsUseCache:
+    for cache_price in glob.glob(dir + '/cache_prices/*.png'):
+        cache_prices_image = Image.open(cache_price)
+        cache_prices.append(cache_price)
+        cache_prices_images.append(cache_prices_image)
 
 SteamIcon = Image.open(dir + '/Images/SteamIcon.png')
 SteamPlayButton = Image.open(dir + '/Images/SteamPlayButton.png')
@@ -467,7 +471,7 @@ def RestartGame():
     time.sleep(0.3)
     mouse_click()
     time.sleep(15)
-    ClickContinueButton()
+    #ClickContinueButton()
     time.sleep(1)
     OpenAuction()
 
