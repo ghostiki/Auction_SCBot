@@ -10,6 +10,7 @@ import os
 import keyboard
 import threading
 import subprocess
+import datetime
 
 # BOT CONTROL START
 items = ['продвинутые зап', 'черный презент']
@@ -111,6 +112,9 @@ current_lot = 0
 
 steam_app_id = "1818450" 
 command = [steam_path, "-applaunch", steam_app_id]
+
+ServerRestartTime = datetime.datetime(2024, 7, 10, 2, 0, 0)
+isServerRestarted = False
 
 #pyautogui.PAUSE = 0.001
 
@@ -475,6 +479,17 @@ def RestartGame():
     time.sleep(1)
     OpenAuction()
 
+def CheckServerRestartTime():
+    global isServerRestarted
+    current_date = datetime.datetime.now(datetime.UTC)
+    if (not isServerRestarted) and (ServerRestartTime.time() < current_date.time() < (ServerRestartTime + datetime.timedelta(minutes = 5)).time()):
+        isServerRestarted = True
+        return True
+    if isServerRestarted and current_date.time() > (ServerRestartTime + datetime.timedelta(minutes = 5)).time():
+        isServerRestarted = False
+    return False
+
+
 def key_listener():
     global running
     keyboard.wait('f5') 
@@ -495,6 +510,10 @@ def main():
         #print("Iteration " + str(iteration))
         #print()
         #logfile.write("Iteration " + str(iteration) + '\n' + '\n')
+
+        if CheckServerRestartTime():
+            RestartGame()
+            continue
         
         if (iteration) % (3000 * refresh_algorithm_coef) == 0:
             RestartGame()
