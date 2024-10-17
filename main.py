@@ -16,7 +16,7 @@ import datetime
 # configure settings
 paths = ["C:/Other/Steam/steam.exe", "D:/Steam/steam.exe"]#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 items = ['продвинутые зап', 'черный презент']
-items_prices = [85000, 40000]
+items_prices = [80000, 40000]
 item_index = 0
 IsUseCache = True
 IsSaveImageInCache = False
@@ -38,7 +38,7 @@ delay_auction_action = 0.5
 delay_after_close_game = 3
 delay_load_characters_from_server = 10
 delay_join_game_connection = 15
-delay_after_click_page_when_find_page_and_scroll = 2
+delay_after_click_page_when_find_page_and_scroll = 0.4
 clickOK_iterations = 10
 
 #IF SLOW HARDWARE
@@ -55,7 +55,7 @@ if (not IsFastHardware):
     delay_after_close_game = 5
     delay_load_characters_from_server = 15
     delay_join_game_connection = 20
-    delay_after_click_page_when_find_page_and_scroll = 2
+    delay_after_click_page_when_find_page_and_scroll = 0.6
     clickOK_iterations = 7 # should be less than on fast hardware
 
 delay_pre_clickOK_position = 0.1
@@ -299,8 +299,6 @@ def FindPageAndScroll():
             screen = screenshot()
             cuttedprices = CutPrices(screen)
             if FindFirstLotWithPrice(cuttedprices):
-                pyautogui.mouseUp()
-                time.sleep(mouse_down_sleep_time)
                 break
         else:
             continue
