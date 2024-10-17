@@ -13,14 +13,56 @@ import subprocess
 import datetime
 
 # BOT CONTROL START
+# configure settings
+paths = ["C:/Other/Steam/steam.exe", "D:/Steam/steam.exe"]#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 items = ['продвинутые зап', 'черный презент']
-items_prices = [85000, 48000]
+items_prices = [85000, 40000]
 item_index = 0
 IsUseCache = True
 IsSaveImageInCache = False
-refresh_algorithm_coef = 2
-steam_path = "C:/Other/Steam/steam.exe"
-# BOT CONTROL END   
+refresh_algorithm_coef = 2 # the higher, the longer the algorithm will not use updating mechanics
+steam_path = paths[0]
+IsFastHardware = True
+
+# DELAYS
+#IF FAST HARDWARE
+mouse_move_time = 0.01
+delay_after_click = 0.01
+page_post_load_anim_time = 0.2
+delay_refresh_page_after_clickOK_time = 0.4
+mouse_down_sleep_time = 0.01
+mouse_drag_delta_time = 0.03
+delay_open_PDA = 3
+delay_open_auction = 1
+delay_auction_action = 0.5
+delay_after_close_game = 3
+delay_load_characters_from_server = 10
+delay_join_game_connection = 15
+delay_after_click_page_when_find_page_and_scroll = 2
+clickOK_iterations = 10
+
+#IF SLOW HARDWARE
+if (not IsFastHardware):
+    mouse_move_time = 0.02
+    delay_after_click = 0.02
+    page_post_load_anim_time = 0.3
+    delay_refresh_page_after_clickOK_time = 0.6
+    mouse_down_sleep_time = 0.02
+    mouse_drag_delta_time = 0.05
+    delay_open_PDA = 5
+    delay_open_auction = 3
+    delay_auction_action = 1
+    delay_after_close_game = 5
+    delay_load_characters_from_server = 15
+    delay_join_game_connection = 20
+    delay_after_click_page_when_find_page_and_scroll = 2
+    clickOK_iterations = 7 # should be less than on fast hardware
+
+delay_pre_clickOK_position = 0.1
+delay_pre_release_ALT_F4 = 0.5
+delay_pre_join_game_click = 1
+
+# BOT CONTROL END
 
 buyoutprice = items_prices[item_index]
 item_name = items[item_index]
@@ -30,15 +72,30 @@ scroll_offset = [90, 180, 269, 360]
 
 dir = os.path.dirname(os.path.abspath(__file__))
 
-#OLD Version
-#x_screenshot, y_screenshot, screenshot_size_x, screenshot_size_y = 889, 385, 513, 369
-#x_price_offset, y_price_offset, price_size_x, price_size_y = 355, 2, 135, 30
-#good_line_size_y = 36
+PageButtonCoords = []
+current_page = 0
+current_scroll = 0
+current_lot = 0
+
+steam_app_id = "1818450" 
+command = [steam_path, "-applaunch", steam_app_id]
+
+ServerRestartTime = datetime.datetime(2024, 7, 10, 2, 0, 0)
+isServerRestarted = False
+
+SteamIcon = Image.open(dir + '/Images/SteamIcon.png')
+SteamPlayButton = Image.open(dir + '/Images/SteamPlayButton.png')
+SteamPlayButton_Nout = Image.open(dir + '/Images/SteamPlayButton_Nout.png')
+SC_WindowName = Image.open(dir + '/Images/SC_WindowName.png')
+OK_Button = Image.open(dir + '/Images/OK_Button.png')
+BuyLot_Button = Image.open(dir + '/Images/BuyLot_Button.png')
+SC_Icon = Image.open(dir + '/Images/SC_Icon.png')
+
 x_screenshot, y_screenshot, screenshot_size_x, screenshot_size_y = 1240, 385, 135, 370
+Pages_images_screenshot_space = (980, 755, 170, 25)
 x_price_offset, y_price_offset, price_size_x, price_size_y = 5, 2, 135, 30
 good_line_size_y = 37
 good_line_local_coord_x, good_line_local_coord_y = screenshot_size_x / 2, good_line_size_y / 2
-search_button_position_x, search_button_position_y = 1337, 337
 scroller_pos_x, scroller_pos_y = 1395, 335
 offsets_in_scroll_for_buy_button = [55, 45.25, 35.5, 25.75, 16]
 buy_button_pos_x, buy_button_offset_y = 1328, offsets_in_scroll_for_buy_button[0]
@@ -53,30 +110,6 @@ cancel_exit_button_x, cancel_exit_button_y = 1035, 647
 lot_pos_x = 1272
 continue_pos_x, continue_pos_y = 960, 775
 
-# PC
-search_sleep_time = 0.4
-OK_time_sleep = 0.7
-mouse_move_sleep_time = 0.01
-click_sleep_time = 0.01
-buy_lot_button_anim_time = 0.02
-page_pre_load_anim_time = 0
-page_post_load_anim_time = 0.2
-refresh_page_after_click_OK_time = 0.1
-mouse_down_sleep_time = 0.01
-mouse_drag_down_sleep_time = 0.03
-
-# SLOW HARDWARE
-# search_sleep_time = 0.4
-# OK_time_sleep = 0.7
-# mouse_move_sleep_time = 0.02
-# click_sleep_time = 0.02
-# buy_lot_button_anim_time = 0.05
-# page_pre_load_anim_time = 0
-# page_post_load_anim_time = 0.3
-# refresh_page_after_click_OK_time = 0.3
-# mouse_down_sleep_time = 0.02
-# mouse_drag_down_sleep_time = 0.05
-
 Page_images = []
 Page_images_touched = []
 
@@ -87,8 +120,6 @@ for page_icon in glob.glob(dir + '/Pages/*.png'):
 for page_touched_icon in glob.glob(dir + '/Pages_touched/*.png'):
     Page_images_touched.append(Image.open(page_touched_icon))
 
-First_page_coords = (980, 755, 170, 25)
-
 cache_prices = []
 cache_prices_images = []
 if IsUseCache:
@@ -97,31 +128,7 @@ if IsUseCache:
         cache_prices.append(cache_price)
         cache_prices_images.append(cache_prices_image)
 
-SteamIcon = Image.open(dir + '/Images/SteamIcon.png')
-SteamPlayButton = Image.open(dir + '/Images/SteamPlayButton.png')
-SteamPlayButton_Nout = Image.open(dir + '/Images/SteamPlayButton_Nout.png')
-SC_WindowName = Image.open(dir + '/Images/SC_WindowName.png')
-OK_Button = Image.open(dir + '/Images/OK_Button.png')
-BuyLot_Button = Image.open(dir + '/Images/BuyLot_Button.png')
-SC_Icon = Image.open(dir + '/Images/SC_Icon.png')
-
-PageButtonCoords = []
-current_page = 0
-current_scroll = 0
-current_lot = 0
-
-steam_app_id = "1818450" 
-command = [steam_path, "-applaunch", steam_app_id]
-
-ServerRestartTime = datetime.datetime(2024, 7, 10, 2, 0, 0)
-isServerRestarted = False
-
 #pyautogui.PAUSE = 0.001
-
-def Search():
-    mouse_move(search_button_position_x, search_button_position_y)
-    pyautogui.click()
-    time.sleep(search_sleep_time)
 
 def screenshot():
     return pyautogui.screenshot(region=(x_screenshot, y_screenshot, screenshot_size_x, screenshot_size_y))
@@ -148,7 +155,6 @@ def preprocess_image(image, target_size=(128, 128)):
     return Image.fromarray(preprocessed_image)
 
 def recognize_image(image, psm_config, whitelist):
-    #starttime = time.time()
     #with PyTessBaseAPI(psm=PSM.SINGLE_WORD, lang='rus') as api:
     with PyTessBaseAPI(psm = psm_config, lang = 'rus') as api:
         api.SetImage(image)
@@ -163,14 +169,11 @@ def recognize_image(image, psm_config, whitelist):
 def FindAndClickPageButton():
     try:
         global PageButtonCoords
-        #PageButtonCoords = pyautogui.locateCenterOnScreen('page1.png')
-
-        time.sleep(page_pre_load_anim_time)
 
         try:
-            PageButtonCoords = pyautogui.center(pyautogui.locateOnScreen(Page_images_touched[current_page], First_page_coords))
+            PageButtonCoords = pyautogui.center(pyautogui.locateOnScreen(Page_images_touched[current_page], Pages_images_screenshot_space))
         except:
-            PageButtonCoords = pyautogui.center(pyautogui.locateOnScreen(Page_images[current_page], First_page_coords))
+            PageButtonCoords = pyautogui.center(pyautogui.locateOnScreen(Page_images[current_page], Pages_images_screenshot_space))
 
         mouse_move(PageButtonCoords[0], PageButtonCoords[1])
         mouse_click()
@@ -215,7 +218,6 @@ def TryBuyLot(image):
     recognized_price = DetermineImageValue(image)
 
     if recognized_price == -1:
-        #FindPageAndScroll()
         return False
     if recognized_price > buyoutprice: return False
 
@@ -256,19 +258,10 @@ def SaveImageInCache(image, price):
 def BuyLot(lot_number, recognized_price):
     mouse_move(lot_pos_x, (y_screenshot + good_line_local_coord_y + lot_number * good_line_size_y))
     mouse_click()
-    
-    # i = 0
-    # while True:
-    #     if (FindImage(BuyLot_Button) or i >= 20): break
-    #     i += 1
-
     mouse_move(buy_button_pos_x, (y_screenshot + lot_number * good_line_size_y + buy_button_offset_y))
-    #time.sleep(buy_lot_button_anim_time)
     mouse_click()
     #PurchaseCheck(recognized_price)
     ClickOK()
-    #Search()
-    time.sleep(refresh_page_after_click_OK_time)
     
 def PurchaseCheck(recognized_price):
     try:
@@ -290,22 +283,29 @@ def FindPageAndScroll():
         current_scroll = 0
         buy_button_offset_y = offsets_in_scroll_for_buy_button[0]
         FindAndClickPageButton()
-        time.sleep(1)
+        time.sleep(delay_after_click_page_when_find_page_and_scroll)
         screen = screenshot()
         cuttedprices = CutPrices(screen)
         if FindFirstLotWithPrice(cuttedprices): 
             break
         mouse_move(scroller_pos_x, scroller_pos_y)
+        pyautogui.mouseDown()
+        time.sleep(mouse_down_sleep_time)
+        
         for i in range(len(scroll_offset)):
             current_scroll += 1
             buy_button_offset_y = offsets_in_scroll_for_buy_button[i + 1]
-            drag_mouse(None, scroller_pos_y + scroll_offset[i])
+            pyautogui.moveTo(None, scroller_pos_y + scroll_offset[i], mouse_drag_delta_time)
             screen = screenshot()
             cuttedprices = CutPrices(screen)
-            if FindFirstLotWithPrice(cuttedprices): 
+            if FindFirstLotWithPrice(cuttedprices):
+                pyautogui.mouseUp()
+                time.sleep(mouse_down_sleep_time)
                 break
         else:
             continue
+        pyautogui.mouseUp()
+        time.sleep(mouse_down_sleep_time)
         break
 
     buy_button_offset_y = offsets_in_scroll_for_buy_button[current_scroll]
@@ -315,15 +315,14 @@ def CutPrices(screenshot):
 
 def ClickOK_Position():
     mouse_move(ok_button_pos_x, ok_button_pos_y)
-    time.sleep(0.1)
+    time.sleep(delay_pre_clickOK_position)
     mouse_click()
 
 def ClickOK():
-    i = 0
-    while True:
-        if(i >= 10 or FindImage(OK_Button)): break
-        i += 1
+    for i in range(clickOK_iterations):
+        if(FindImage(OK_Button)): break
     ClickOK_Position()
+    time.sleep(delay_refresh_page_after_clickOK_time)
     
 def ClearPrice(priceRaw):
         price = ""
@@ -340,109 +339,45 @@ def ClearPrice(priceRaw):
 
 
 def mouse_move(x, y):
-    pyautogui.moveTo(x, y, _pause = 0.01)
+    pyautogui.moveTo(x, y, _pause = mouse_move_time)
 
 def mouse_click():
     pyautogui.click()
-    time.sleep(click_sleep_time)
-
-def mouse_down():
-    pyautogui.mouseDown()
-
-def mouse_up():
-    pyautogui.mouseUp()
+    time.sleep(delay_after_click)
 
 def drag_mouse(dx, dy):
-
     pyautogui.mouseDown()
     time.sleep(mouse_down_sleep_time)
-    #pyautogui.mouseDown()
-    #time.sleep(mouse_down_sleep_time)
-    #pyautogui.mouseDown()
-    #time.sleep(mouse_down_sleep_time)
-    
-    pyautogui.moveTo(dx, dy, mouse_drag_down_sleep_time)
-
+    pyautogui.moveTo(dx, dy, mouse_drag_delta_time)
     pyautogui.mouseUp()
     time.sleep(mouse_down_sleep_time)
-    #pyautogui.mouseUp()
-    #time.sleep(mouse_down_sleep_time)
-    #pyautogui.mouseUp()
-    #time.sleep(mouse_down_sleep_time)
-
-def ReloadGame():
-    time.sleep(2)
-    ClickOK()
-    time.sleep(1)
-    ClickMainMenuButton()
-    time.sleep(1)
-    ClickCancelExitButton()
-    time.sleep(1)
-    keyboard.press_and_release('esc')
-    time.sleep(3)
-    keyboard.press_and_release('esc')
-    time.sleep(3)
-    ClickExitGameButton()
-    time.sleep(5)
-    ClickMainMenuButton()
-    time.sleep(5)
-    mouse_move(join_game_button_x, join_game_button_y)
-    time.sleep(1)
-    mouse_click()
-    time.sleep(15)
-    OpenAuction()
     
 def OpenAuction():
     keyboard.press_and_release('h')
-    time.sleep(3)
+    time.sleep(delay_open_PDA)
     mouse_move(auction_button_x, auction_button_y)
-    time.sleep(0.5)
+    time.sleep(delay_auction_action)
     mouse_click()
-    time.sleep(0.5)
+    time.sleep(delay_open_auction)
     mouse_move(lot_name_window_x, lot_name_window_y)
-    time.sleep(0.5)
+    time.sleep(delay_auction_action)
     mouse_click()
-    time.sleep(0.5)
+    time.sleep(delay_auction_action)
     keyboard.write(item_name)
-    time.sleep(1)
+    time.sleep(delay_auction_action)
     mouse_move(sort_lots_button_x, sort_lots_button_y)
-    time.sleep(0.5)
+    time.sleep(delay_auction_action)
     mouse_click()
-    time.sleep(1)
+    time.sleep(delay_auction_action)
     mouse_click()
-    time.sleep(1)
-
-def ClickExitGameButton():
-    mouse_move(exit_game_button_x, exit_game_button_y)
-    time.sleep(1)
-    mouse_click()
-
-def ClickMainMenuButton():
-    mouse_move(socket_exception_button_x, socket_exception_button_y)
-    time.sleep(1)
-    mouse_click()
-
-def ClickCancelExitButton():
-    mouse_move(cancel_exit_button_x, cancel_exit_button_y)
-    time.sleep(1)
-    mouse_click()
+    time.sleep(delay_auction_action)
 
 def PressALT_F4():
     keyboard.press('alt')
     keyboard.press('f4')
-    time.sleep(0.5)
+    time.sleep(delay_pre_release_ALT_F4)
     keyboard.release('f4')
     keyboard.release('alt')
-
-def FindAndClickImage(IconImage):
-    try:
-        IconCoords = pyautogui.locateCenterOnScreen(IconImage)
-        mouse_move(IconCoords[0], IconCoords[1])
-        time.sleep(1)
-        mouse_click()
-        return True
-    except:
-        return False
     
 def FindImage(IconImage):
     try:
@@ -454,29 +389,27 @@ def FindImage(IconImage):
 def CheckSCIsRunning():
     return(FindImage(SC_Icon))
 
-def ClickContinueButton():
-    mouse_move(continue_pos_x, continue_pos_y)
-    time.sleep(0.3)
-    mouse_click()   
-
-def RestartGame():
+def CloseGame():
     if (CheckSCIsRunning()):
         PressALT_F4()
-    time.sleep(10)
+    while(True):
+        if (not CheckSCIsRunning()):
+            break
+
+def OpenGame():
     subprocess.run(command)
-    # while(True):
-    #     FindAndClickImage(SteamIcon)
-    #     if(FindAndClickImage(SteamPlayButton)): break
-    #     if(FindAndClickImage(SteamPlayButton_Nout)): break
     while(True):
         if(FindImage(SC_WindowName)): break
-    time.sleep(10)
+
+def RestartGame():
+    CloseGame()
+    time.sleep(delay_after_close_game)
+    OpenGame()
+    time.sleep(delay_load_characters_from_server)
     mouse_move(join_game_button_x, join_game_button_y)
-    time.sleep(0.3)
+    time.sleep(delay_pre_join_game_click)
     mouse_click()
-    time.sleep(15)
-    #ClickContinueButton()
-    time.sleep(1)
+    time.sleep(delay_join_game_connection)
     OpenAuction()
 
 def CheckServerRestartTime():
