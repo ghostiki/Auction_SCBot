@@ -16,7 +16,7 @@ import datetime
 # configure settings
 paths = ["C:/Other/Steam/steam.exe", "D:/Steam/steam.exe"]#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 items = ['продвинутые зап', 'черный презент']
-items_prices = [80000, 40000]
+items_prices = [75000, 35000]
 item_index = 0
 IsUseCache = True
 IsSaveImageInCache = False
@@ -351,6 +351,7 @@ def drag_mouse(dx, dy):
     time.sleep(mouse_down_sleep_time)
     
 def OpenAuction():
+    print("Начало открытия аукциона")
     keyboard.press_and_release('h')
     time.sleep(delay_open_PDA)
     mouse_move(auction_button_x, auction_button_y)
@@ -369,6 +370,7 @@ def OpenAuction():
     time.sleep(delay_auction_action)
     mouse_click()
     time.sleep(delay_auction_action)
+    print("Аукцион готов к торгам")
 
 def PressALT_F4():
     keyboard.press('alt')
@@ -390,16 +392,21 @@ def CheckSCIsRunning():
 def CloseGame():
     if (CheckSCIsRunning()):
         PressALT_F4()
+        print("ALT F4")
     while(True):
         if (not CheckSCIsRunning()):
             break
+    print("ALT F4 сработал, игра закрылась")
 
 def OpenGame():
     subprocess.run(command)
+    print("Выполнена команда стима для запуска игры")
     while(True):
         if(FindImage(SC_WindowName)): break
+    print("Игра запустилась")
 
 def RestartGame():
+    print("Начало перезапуска игры")
     CloseGame()
     time.sleep(delay_after_close_game)
     OpenGame()
@@ -415,9 +422,11 @@ def CheckServerRestartTime():
     current_date = datetime.datetime.now(datetime.UTC)
     if (not isServerRestarted) and (ServerRestartTime.time() < current_date.time() < (ServerRestartTime + datetime.timedelta(minutes = 5)).time()):
         isServerRestarted = True
+        print("Нужно перезапустить игру 12.00")
         return True
     if isServerRestarted and current_date.time() > (ServerRestartTime + datetime.timedelta(minutes = 5)).time():
         isServerRestarted = False
+        print("Переменная перезапуска после 12.00 возвращена в FALSE")
     return False
 
 
