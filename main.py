@@ -16,7 +16,7 @@ import datetime
 # configure settings
 paths = ["C:/Other/Steam/steam.exe", "D:/Steam/steam.exe"]#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 items = ['продвинутые зап', 'черный презент']
-items_prices = [75000, 35000]
+items_prices = [70000, 30000]
 item_index = 0
 IsUseCache = True
 IsSaveImageInCache = False
@@ -90,6 +90,7 @@ SC_WindowName = Image.open(dir + '/Images/SC_WindowName.png')
 OK_Button = Image.open(dir + '/Images/OK_Button.png')
 BuyLot_Button = Image.open(dir + '/Images/BuyLot_Button.png')
 SC_Icon = Image.open(dir + '/Images/SC_Icon.png')
+DailyRewardImage = Image.open(dir + '/Images/DailyReward.png')
 
 x_screenshot, y_screenshot, screenshot_size_x, screenshot_size_y = 1240, 385, 135, 370
 Pages_images_screenshot_space = (980, 755, 170, 25)
@@ -260,18 +261,7 @@ def BuyLot(lot_number, recognized_price):
     mouse_click()
     mouse_move(buy_button_pos_x, (y_screenshot + lot_number * good_line_size_y + buy_button_offset_y))
     mouse_click()
-    #PurchaseCheck(recognized_price)
     ClickOK()
-    
-def PurchaseCheck(recognized_price):
-    try:
-        _coords = pyautogui.locateCenterOnScreen('Lot_Purchased.png')
-        #founded_pricec_log.write(str(recognized_price) + '\n')
-        #founded_pricec_log.write('Purchased' + '\n' + '\n')
-        #logfile.write('Purchased' + '\n' + '\n')
-    except:
-        #logfile.write('Purchase FAILED' + '\n' + '\n')
-        pass
 
 def FindPageAndScroll():
     global buy_button_offset_y
@@ -417,17 +407,25 @@ def RestartGame():
     time.sleep(delay_join_game_connection)
     OpenAuction()
 
-def CheckServerRestartTime():
-    global isServerRestarted
-    current_date = datetime.datetime.now(datetime.UTC)
-    if (not isServerRestarted) and (ServerRestartTime.time() < current_date.time() < (ServerRestartTime + datetime.timedelta(minutes = 5)).time()):
-        isServerRestarted = True
-        print("Нужно перезапустить игру 12.00")
+# def CheckServerRestartTime():
+#     global isServerRestarted
+#     current_date = datetime.datetime.now(datetime.UTC)
+#     if (not isServerRestarted) and (ServerRestartTime.time() < current_date.time() < (ServerRestartTime + datetime.timedelta(minutes = 5)).time()):
+#         isServerRestarted = True
+#         print("Нужно перезапустить игру 12.00")
+#         return True
+#     if isServerRestarted and current_date.time() > (ServerRestartTime + datetime.timedelta(minutes = 5)).time():
+#         isServerRestarted = False
+#         print("Переменная перезапуска после 12.00 возвращена в FALSE")
+#     return False
+
+def CheckDailyReward():
+    try:
+        _coords = pyautogui.locateCenterOnScreen(DailyRewardImage)
+        print("Появилось окно дневной награды")
         return True
-    if isServerRestarted and current_date.time() > (ServerRestartTime + datetime.timedelta(minutes = 5)).time():
-        isServerRestarted = False
-        print("Переменная перезапуска после 12.00 возвращена в FALSE")
-    return False
+    except:
+        return False
 
 
 def key_listener():
@@ -451,7 +449,7 @@ def main():
         #print()
         #logfile.write("Iteration " + str(iteration) + '\n' + '\n')
 
-        if CheckServerRestartTime():
+        if (iteration) % (200 * refresh_algorithm_coef) == 0 and CheckDailyReward():
             RestartGame()
             continue
         
