@@ -16,7 +16,7 @@ import datetime
 # configure settings
 paths = ["C:/Other/Steam/steam.exe", "D:/Steam/steam.exe"]#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 items = ['продвинутые зап', 'черный презент']
-items_prices = [70000, 30000]
+items_prices = [64000, 25000]
 item_index = 0
 IsUseCache = True
 IsSaveImageInCache = False
@@ -341,7 +341,6 @@ def drag_mouse(dx, dy):
     time.sleep(mouse_down_sleep_time)
     
 def OpenAuction():
-    print("Начало открытия аукциона")
     keyboard.press_and_release('h')
     time.sleep(delay_open_PDA)
     mouse_move(auction_button_x, auction_button_y)
@@ -381,8 +380,9 @@ def CheckSCIsRunning():
 
 def CloseGame():
     if (CheckSCIsRunning()):
-        PressALT_F4()
-        print("ALT F4")
+        # PressALT_F4()
+        # print("ALT F4")
+        os.system("taskkill /f /im  stalcraftw.exe")
     while(True):
         if (not CheckSCIsRunning()):
             break
