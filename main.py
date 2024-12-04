@@ -90,6 +90,7 @@ SC_WindowName = Image.open(dir + '/Images/SC_WindowName.png')
 OK_Button = Image.open(dir + '/Images/OK_Button.png')
 BuyLot_Button = Image.open(dir + '/Images/BuyLot_Button.png')
 SC_Icon = Image.open(dir + '/Images/SC_Icon.png')
+SC_Icon_2 = Image.open(dir + '/Images/SC_Icon_2.png')
 DailyRewardImage = Image.open(dir + '/Images/DailyReward.png')
 ToMainMenuImage = Image.open(dir + '/Images/ToMainMenu.png')
 
@@ -377,7 +378,7 @@ def FindImage(IconImage):
         return False
     
 def CheckSCIsRunning():
-    return(FindImage(SC_Icon))
+    return(FindImage(SC_Icon) or FindImage(SC_Icon_2))
 
 def CloseGame():
     if (CheckSCIsRunning()):
