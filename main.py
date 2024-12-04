@@ -35,9 +35,9 @@ mouse_drag_delta_time = 0.03
 delay_open_PDA = 3
 delay_open_auction = 1
 delay_auction_action = 0.5
-delay_after_close_game = 3
 delay_load_characters_from_server = 10
 delay_join_game_connection = 15
+delay_after_close_game = 10
 delay_after_click_page_when_find_page_and_scroll = 0.4
 clickOK_iterations = 10
 
@@ -381,13 +381,7 @@ def CheckSCIsRunning():
     return(FindImage(SC_Icon) or FindImage(SC_Icon_2))
 
 def CloseGame():
-    if (CheckSCIsRunning()):
-        # PressALT_F4()
-        # print("ALT F4")
-        os.system("taskkill /f /im  stalcraftw.exe")
-    while(True):
-        if (not CheckSCIsRunning()):
-            break
+    os.system("taskkill /f /im  stalcraftw.exe")
     print("ALT F4 сработал, игра закрылась")
 
 def OpenGame():
