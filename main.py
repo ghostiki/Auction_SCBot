@@ -15,8 +15,8 @@ import datetime
 # BOT CONTROL START
 # configure settings
 paths = ["C:/Other/Steam/steam.exe", "D:/Steam/steam.exe"]#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-items = ['продвинутые зап', 'черный презент']
-items_prices = [67000, 25000]
+items = ['продвинутые зап', 'старый скарб']
+items_prices = [65001, 40011]
 item_index = 0
 IsUseCache = True
 IsSaveImageInCache = False
@@ -93,6 +93,7 @@ SC_Icon = Image.open(dir + '/Images/SC_Icon.png')
 SC_Icon_2 = Image.open(dir + '/Images/SC_Icon_2.png')
 DailyRewardImage = Image.open(dir + '/Images/DailyReward.png')
 ToMainMenuImage = Image.open(dir + '/Images/ToMainMenu.png')
+AuctionImage = Image.open(dir + '/Images/Auction.png')
 
 x_screenshot, y_screenshot, screenshot_size_x, screenshot_size_y = 1240, 385, 135, 370
 Pages_images_screenshot_space = (980, 755, 170, 25)
@@ -445,7 +446,7 @@ def main():
         #logfile.write("Iteration " + str(iteration) + '\n' + '\n')
 
         if (iteration) % (200 * refresh_algorithm_coef) == 0:
-            if FindImage(DailyRewardImage) or FindImage(ToMainMenuImage):
+            if FindImage(DailyRewardImage) or FindImage(ToMainMenuImage) or (not FindImage(AuctionImage)):
                 RestartGame()
                 continue
         
