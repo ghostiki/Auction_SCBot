@@ -445,7 +445,7 @@ def main():
         #print()
         #logfile.write("Iteration " + str(iteration) + '\n' + '\n')
 
-        if (iteration) % (200 * refresh_algorithm_coef) == 0:
+        if (iteration) % (100 * refresh_algorithm_coef) == 0:
             if FindImage(DailyRewardImage) or FindImage(ToMainMenuImage) or (not FindImage(AuctionImage)):
                 RestartGame()
                 continue
