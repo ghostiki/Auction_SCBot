@@ -61,6 +61,7 @@ if (not IsFastHardware):
 delay_pre_clickOK_position = 0.1
 delay_pre_release_ALT_F4 = 0.5
 delay_pre_join_game_click = 1
+delay_refresh_first_page_first_scroll = 0.2
 
 # BOT CONTROL END
 
@@ -234,6 +235,7 @@ def TryBuyLot(image):
     #priceicon.save("priceicons/priceicon_iteration_" + str(iteration) + "_priceicon_" + str(i) + ".jpg")
 
     BuyLot(current_lot, recognized_price)
+    RefreshFirstPageFirstScroll()
     return True
 
 
@@ -404,6 +406,11 @@ def RestartGame():
     time.sleep(delay_join_game_connection)
     OpenAuction()
 
+def RefreshFirstPageFirstScroll():
+    if current_page == 0 and current_scroll == 0:
+        FindAndClickPageButton()
+        time.sleep(delay_refresh_first_page_first_scroll)
+
 # def CheckServerRestartTime():
 #     global isServerRestarted
 #     current_date = datetime.datetime.now(datetime.UTC)
@@ -446,8 +453,11 @@ def main():
         #logfile.write("Iteration " + str(iteration) + '\n' + '\n')
 
         if (iteration) % (100 * refresh_algorithm_coef) == 0:
-            if FindImage(DailyRewardImage) or FindImage(ToMainMenuImage) or (not FindImage(AuctionImage)):
+            if FindImage(DailyRewardImage) or FindImage(ToMainMenuImage):
                 RestartGame()
+                continue
+            elif (not FindImage(AuctionImage)):
+                OpenAuction()
                 continue
         
         if (iteration) % (3000 * refresh_algorithm_coef) == 0:
