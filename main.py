@@ -235,7 +235,7 @@ def TryBuyLot(image):
     #priceicon.save("priceicons/priceicon_iteration_" + str(iteration) + "_priceicon_" + str(i) + ".jpg")
 
     BuyLot(current_lot, recognized_price)
-    RefreshFirstPageFirstScroll()
+    #RefreshFirstPageFirstScroll()
     return True
 
 
@@ -364,7 +364,7 @@ def OpenAuction():
     time.sleep(delay_auction_action)
     mouse_click()
     time.sleep(delay_auction_action)
-    print("Аукцион готов к торгам")
+    #print("Аукцион готов к торгам")
 
 def PressALT_F4():
     keyboard.press('alt')
@@ -385,17 +385,17 @@ def CheckSCIsRunning():
 
 def CloseGame():
     os.system("taskkill /f /im  stalcraftw.exe")
-    print("ALT F4 сработал, игра закрылась")
+    #print("ALT F4 сработал, игра закрылась")
 
 def OpenGame():
     subprocess.run(command)
-    print("Выполнена команда стима для запуска игры")
+    #print("Выполнена команда стима для запуска игры")
     while(True):
         if(FindImage(SC_WindowName)): break
-    print("Игра запустилась")
+    #print("Игра запустилась")
 
 def RestartGame():
-    print("Начало перезапуска игры")
+    #print("Начало перезапуска игры")
     CloseGame()
     time.sleep(delay_after_close_game)
     OpenGame()
@@ -458,7 +458,6 @@ def main():
                 continue
             elif (not FindImage(AuctionImage)):
                 OpenAuction()
-                continue
         
         if (iteration) % (3000 * refresh_algorithm_coef) == 0:
             RestartGame()
