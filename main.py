@@ -15,29 +15,30 @@ import datetime
 # BOT CONTROL START
 # configure settings
 paths = ["C:/Other/Steam/steam.exe", "D:/Steam/steam.exe"]#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-items = ['продвинутые зап', 'старый скарб']
-items_prices = [65001, 40011]
+items = ['продвинутые зап', 'забытые припасы']
+items_prices = [80001, 45011]
 item_index = 0
 IsUseCache = True
 IsSaveImageInCache = False
 refresh_algorithm_coef = 2 # the higher, the longer the algorithm will not use updating mechanics
 steam_path = paths[0]
 IsFastHardware = True
+buy_lot_count = 0
 
 # DELAYS
 #IF FAST HARDWARE
 mouse_move_time = 0.01
 delay_after_click = 0.01
-page_post_load_anim_time = 0.2
+page_post_load_anim_time = 0.25
 delay_refresh_page_after_clickOK_time = 0.4
 mouse_down_sleep_time = 0.01
 mouse_drag_delta_time = 0.03
 delay_open_PDA = 3
 delay_open_auction = 1
 delay_auction_action = 0.5
-delay_load_characters_from_server = 10
-delay_join_game_connection = 15
-delay_after_close_game = 10
+delay_after_close_game = 30
+delay_load_characters_from_server = 20
+delay_join_game_connection = 25
 delay_after_click_page_when_find_page_and_scroll = 0.4
 clickOK_iterations = 10
 
@@ -61,7 +62,7 @@ if (not IsFastHardware):
 delay_pre_clickOK_position = 0.1
 delay_pre_release_ALT_F4 = 0.5
 delay_pre_join_game_click = 1
-delay_refresh_first_page_first_scroll = 0.2
+delay_refresh_first_page_first_scroll = 0
 
 # BOT CONTROL END
 
@@ -262,10 +263,13 @@ def SaveImageInCache(image, price):
         image.save('cache_prices/' + str(price) + '.png')
 
 def BuyLot(lot_number, recognized_price):
+    global buy_lot_count
     mouse_move(lot_pos_x, (y_screenshot + good_line_local_coord_y + lot_number * good_line_size_y))
     mouse_click()
     mouse_move(buy_button_pos_x, (y_screenshot + lot_number * good_line_size_y + buy_button_offset_y))
     mouse_click()
+    buy_lot_count += 1
+    print(buy_lot_count)
     ClickOK()
 
 def FindPageAndScroll():
@@ -453,11 +457,10 @@ def main():
         #logfile.write("Iteration " + str(iteration) + '\n' + '\n')
 
         if (iteration) % (100 * refresh_algorithm_coef) == 0:
-            if FindImage(DailyRewardImage) or FindImage(ToMainMenuImage):
+            if (not FindImage(AuctionImage)):
                 RestartGame()
+                iteration = 0
                 continue
-            elif (not FindImage(AuctionImage)):
-                OpenAuction()
         
         if (iteration) % (3000 * refresh_algorithm_coef) == 0:
             RestartGame()
