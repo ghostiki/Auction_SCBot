@@ -11,19 +11,21 @@ import keyboard
 import threading
 import subprocess
 import datetime
+import random
 
 # BOT CONTROL START
 # configure settings
-paths = ["C:/Other/Steam/steam.exe", "D:/Steam/steam.exe"]#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+paths = ["C:/Other/Steam/steam.exe", "D:/Steam/steam.exe", "C:/Program Files (x86)/Steam/steam.exe"]#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 items = ['продвинутые зап', 'забытые припасы']
-items_prices = [70001, 32011]
+items_prices = [79001, 34011]
 item_index = 0
+steam_path = paths[0]
+auction_button = 'h'
+refresh_algorithm_coef = 2 # the higher, the longer the algorithm will not use updating mechanics
+
 IsUseCache = True
 IsSaveImageInCache = False
-refresh_algorithm_coef = 2 # the higher, the longer the algorithm will not use updating mechanics
-steam_path = paths[0]
 IsFastHardware = True
-buy_lot_count = 0
 
 # DELAYS
 #IF FAST HARDWARE
@@ -39,7 +41,7 @@ delay_auction_action = 0.5
 delay_after_close_game = 30
 delay_load_characters_from_server = 20
 delay_join_game_connection = 25
-delay_after_click_page_when_find_page_and_scroll = 0.4
+delay_after_click_page_when_find_page_and_scroll = 0.6
 clickOK_iterations = 10
 
 #IF SLOW HARDWARE
@@ -49,14 +51,14 @@ if (not IsFastHardware):
     page_post_load_anim_time = 0.3
     delay_refresh_page_after_clickOK_time = 0.6
     mouse_down_sleep_time = 0.02
-    mouse_drag_delta_time = 0.05
+    mouse_drag_delta_time = 0.01
     delay_open_PDA = 5
     delay_open_auction = 3
     delay_auction_action = 1
     delay_after_close_game = 5
     delay_load_characters_from_server = 15
     delay_join_game_connection = 20
-    delay_after_click_page_when_find_page_and_scroll = 0.6
+    delay_after_click_page_when_find_page_and_scroll = 0.8
     clickOK_iterations = 7 # should be less than on fast hardware
 
 delay_pre_clickOK_position = 0.1
@@ -65,6 +67,8 @@ delay_pre_join_game_click = 1
 delay_refresh_first_page_first_scroll = 0
 
 # BOT CONTROL END
+
+buy_lot_count = 0
 
 buyoutprice = items_prices[item_index]
 item_name = items[item_index]
@@ -134,7 +138,17 @@ if IsUseCache:
         cache_prices.append(cache_price)
         cache_prices_images.append(cache_prices_image)
 
-#pyautogui.PAUSE = 0.001
+pyautogui.PAUSE = 0.0001
+pyautogui.FAILSAFE = False
+
+pre_click_delay = 0.05
+lot_appearance_delay = 0.1
+before_click_scroll_line_delay = 0.2
+after_drag_scroll_delay = 0.05
+pre_mouse_move_delay = 0.05
+
+mouse_down_sleep_time = 0.02
+mouse_drag_delta_time = 0.11
 
 def screenshot():
     return pyautogui.screenshot(region=(x_screenshot, y_screenshot, screenshot_size_x, screenshot_size_y))
@@ -181,19 +195,18 @@ def FindAndClickPageButton():
         except:
             PageButtonCoords = pyautogui.center(pyautogui.locateOnScreen(Page_images[current_page], Pages_images_screenshot_space))
 
-        mouse_move(PageButtonCoords[0], PageButtonCoords[1])
+        mouse_move(PageButtonCoords[0] + random.randint(-3, 3), PageButtonCoords[1] + random.randint(-3, 3), False)
         mouse_click()
-
-        time.sleep(page_post_load_anim_time)
-
         return True
     except:
         return False
 
 def AnalizePage():
     if (current_scroll != 0):
+        time.sleep(page_post_load_anim_time)
         mouse_move(scroller_pos_x, scroller_pos_y)
         drag_mouse(None, scroller_pos_y + scroll_offset[current_scroll - 1])
+        time.sleep(after_drag_scroll_delay)
 
     screen = screenshot()
     cuttedprices = CutPrices(screen)
@@ -264,7 +277,7 @@ def SaveImageInCache(image, price):
 
 def BuyLot(lot_number, recognized_price):
     global buy_lot_count
-    mouse_move(lot_pos_x, (y_screenshot + good_line_local_coord_y + lot_number * good_line_size_y))
+    mouse_move(lot_pos_x, (y_screenshot + good_line_local_coord_y + lot_number * good_line_size_y), False)
     mouse_click()
     mouse_move(buy_button_pos_x, (y_screenshot + lot_number * good_line_size_y + buy_button_offset_y))
     mouse_click()
@@ -287,7 +300,8 @@ def FindPageAndScroll():
         cuttedprices = CutPrices(screen)
         if FindFirstLotWithPrice(cuttedprices): 
             break
-        mouse_move(scroller_pos_x, scroller_pos_y)
+        mouse_move(scroller_pos_x, scroller_pos_y, False)
+        time.sleep(before_click_scroll_line_delay)
         pyautogui.mouseDown()
         time.sleep(mouse_down_sleep_time)
         
@@ -295,6 +309,7 @@ def FindPageAndScroll():
             current_scroll += 1
             buy_button_offset_y = offsets_in_scroll_for_buy_button[i + 1]
             pyautogui.moveTo(None, scroller_pos_y + scroll_offset[i], mouse_drag_delta_time)
+            time.sleep(after_drag_scroll_delay)
             screen = screenshot()
             cuttedprices = CutPrices(screen)
             if FindFirstLotWithPrice(cuttedprices):
@@ -313,7 +328,7 @@ def CutPrices(screenshot):
 def ClickOK_Position():
     mouse_move(ok_button_pos_x, ok_button_pos_y)
     time.sleep(delay_pre_clickOK_position)
-    mouse_click()
+    mouse_click(False)
 
 def ClickOK():
     for i in range(clickOK_iterations):
@@ -335,12 +350,16 @@ def ClearPrice(priceRaw):
             return (-1)
 
 
-def mouse_move(x, y):
-    pyautogui.moveTo(x, y, _pause = mouse_move_time)
+def mouse_move(x, y, isNeedInitialDelay = True):
+    if isNeedInitialDelay:
+        time.sleep(pre_mouse_move_delay)
+    pyautogui.moveTo(x, y, _pause = False)
+    #pyautogui.moveTo(x, y, _pause = mouse_move_time)
 
-def mouse_click():
+def mouse_click(isNeedInitialDelay = True):
+    if isNeedInitialDelay:
+        time.sleep(pre_click_delay)
     pyautogui.click()
-    time.sleep(delay_after_click)
 
 def drag_mouse(dx, dy):
     pyautogui.mouseDown()
@@ -350,7 +369,7 @@ def drag_mouse(dx, dy):
     time.sleep(mouse_down_sleep_time)
     
 def OpenAuction():
-    keyboard.press_and_release('h')
+    keyboard.press_and_release(auction_button)
     time.sleep(delay_open_PDA)
     mouse_move(auction_button_x, auction_button_y)
     time.sleep(delay_auction_action)
