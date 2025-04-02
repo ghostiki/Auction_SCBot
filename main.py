@@ -16,7 +16,7 @@ import datetime
 # configure settings
 paths = ["C:/Other/Steam/steam.exe", "D:/Steam/steam.exe"]#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 items = ['продвинутые зап', 'забытые припасы']
-items_prices = [80001, 45011]
+items_prices = [70001, 32011]
 item_index = 0
 IsUseCache = True
 IsSaveImageInCache = False
@@ -27,12 +27,12 @@ buy_lot_count = 0
 
 # DELAYS
 #IF FAST HARDWARE
-mouse_move_time = 0.01
-delay_after_click = 0.01
-page_post_load_anim_time = 0.25
+mouse_move_time = 0.005
+delay_after_click = 0.005
+page_post_load_anim_time = 0.2
 delay_refresh_page_after_clickOK_time = 0.4
 mouse_down_sleep_time = 0.01
-mouse_drag_delta_time = 0.03
+mouse_drag_delta_time = 0.01
 delay_open_PDA = 3
 delay_open_auction = 1
 delay_auction_action = 0.5
