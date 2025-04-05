@@ -318,7 +318,7 @@ def ClickOK():
     if _isOKFounded:
         ClickOK_Position()
         time.sleep(delay_refresh_page_after_clickOK_time)
-        MultipleRefreshPage()
+    MultipleRefreshPage()
 
 def MultipleRefreshPage():
     for i in range (count_of_page_refreshes_after_buy_lot):
