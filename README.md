@@ -9,7 +9,7 @@
     * cmd: .\Scripts\activate
     * VS Code: Ctrl+Shift+P, команда "Python: Select Interpreter"
 
-Установка библиотек: pip install -r requirements.txt
+Установка библиотек: pip install -r requirements.txt  
 Установка tesserocr:
 * Официальный репозиторий: https://github.com/sirfz/tesserocr  
 Если версия Python отличается, следовать инструкции по установке в репозитории
