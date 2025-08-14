@@ -17,6 +17,8 @@
 
 Настройка бота  
 Все настройки выполняются в блоке # BOT CONTROL START, это самый важный блок скрипта:
+* WEBHOOK_URL: путь до ссылки на вебхук дискорда.
+* AVATAR_URL: путь до ссылки на аватарку для вебхука дискорда.
 * paths: массив путей к разным версиям Steam (steam.exe).
 * steam_path: индекс используемой Steam-версии в массиве paths.
 * items: список торгуемых предметов.
@@ -40,6 +42,8 @@ Requires a stable internet connection and proper screen resolution.
 
 Bot Configuration  
 All configuration is done in the # BOT CONTROL START section — this is the most important part of the script:
+* WEBHOOK_URL: The path to the link to the discord's webhook.
+* AVATAR_URL: the path to the link to the avatar for the discord webhook.
 * paths: array of paths to different steam.exe installations.
 * steam_path: index of the Steam version to use from paths.
 * items: array of tradeable item names.
